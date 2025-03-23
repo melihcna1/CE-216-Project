@@ -23,7 +23,7 @@ public class Artifact {
     public Artifact(String artifactID, String artifactName, String category, String civilization,
                     String discoveryLocation, String composition, String discoveryDate,
                     String currentPlace, double width, double length, double height, double weight,
-                    List<String> tags, String imagePath) {
+                    List<String> tags) {
         this.artifactID = artifactID;
         this.artifactName = artifactName;
         this.category = category;
@@ -37,7 +37,6 @@ public class Artifact {
         this.height = height;
         this.weight = weight;
         this.tags = tags;
-        this.imagePath = imagePath;
     }
 
     // Getters and setters
@@ -82,4 +81,23 @@ public class Artifact {
 
     public String getImagePath() { return imagePath; }
     public void setImagePath(String imagePath) { this.imagePath = imagePath; }
+
+    @Override
+    public String toString() {
+        return "Artifact{" +
+                "artifactID='" + artifactID + '\'' +
+                ", artifactName='" + artifactName + '\'' +
+                ", category='" + category + '\'' +
+                ", civilization='" + civilization + '\'' +
+                ", discoveryLocation='" + discoveryLocation + '\'' +
+                ", composition='" + composition + '\'' +
+                ", discoveryDate='" + discoveryDate + '\'' +
+                ", currentPlace='" + currentPlace + '\'' +
+                ", width=" + width +
+                ", length=" + length +
+                ", height=" + height +
+                ", weight=" + weight +
+                ", tags=" + tags +
+                '}';
+    }
 }

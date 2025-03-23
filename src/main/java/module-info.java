@@ -4,6 +4,6 @@ module com.example.artifactcataloggg {
     requires com.google.gson;
 
 
-    opens com.example.artifactcataloggg to javafx.fxml;
+    opens com.example.artifactcataloggg to javafx.fxml, com.google.gson;
     exports com.example.artifactcataloggg;
 }

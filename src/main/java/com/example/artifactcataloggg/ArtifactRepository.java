@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.io.*;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,12 @@ public class ArtifactRepository {
     }
 
     public void addArtifact(Artifact artifact) {
+        if (artifacts.stream().anyMatch(a -> a.getArtifactID().equals(artifact.getArtifactID()))) {
+            System.out.println("Bu ID'ye sahip bir artifact zaten var!");
+            return;
+        }
         artifacts.add(artifact);
+        System.out.println("Yeni Artifact eklendi: " + artifact.getArtifactID() + " - " + artifact.getArtifactName());
         saveArtifacts();
     }
 
@@ -51,13 +57,21 @@ public class ArtifactRepository {
     }
 
     public List<Artifact> loadArtifacts() {
-        File file = new File(FILE_PATH);
-        if (!file.exists()) return new ArrayList<>();
-        try (Reader reader = new FileReader(FILE_PATH)) {
-            return gson.fromJson(reader, new TypeToken<List<Artifact>>() {}.getType());
+        File file = new File("artifacts.json");
+
+        // Eğer dosya yoksa veya içi boşsa, boş bir liste döndür
+        if (!file.exists() || file.length() == 0) {
+            System.out.println("Uyarı: JSON dosyası bulunamadı veya boş! Boş liste döndürülüyor.");
+            return new ArrayList<>();
+        }
+
+        try (Reader reader = new FileReader(file)) {
+            Type artifactListType = new TypeToken<List<Artifact>>() {}.getType();
+            return new Gson().fromJson(reader, artifactListType);
         } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
     }
+
 }
