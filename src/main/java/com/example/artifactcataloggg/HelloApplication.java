@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class HelloApplication extends Application {
     @Override
@@ -18,6 +19,17 @@ public class HelloApplication extends Application {
     }
 
     public static void main(String[] args) {
-        launch();
+        //launch();
+        ArtifactController controller = new ArtifactController();
+
+      //  Artifact newArtifact = new Artifact("A002", "Ancient Vase", "Ceramic", "Greek", "Athens", "Clay", "500 BC", "British Museum", 30, 30, 30,30, Arrays.asList("Antique", "Greek", "Handmade"));
+
+       // controller.createArtifact(newArtifact);
+      //  controller.deleteArtifact("A004");
+        controller.handleAddArtifact("A005", "Ancient Sword");
+        System.out.println("Mevcut Artifactler:");
+        for (Artifact artifact : controller.getAllArtifacts()) {
+            System.out.println(artifact);
+        }
     }
 }
