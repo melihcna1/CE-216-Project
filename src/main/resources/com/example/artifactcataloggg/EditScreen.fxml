@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import javafx.scene.layout.Region?>
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="434.0" prefWidth="336.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="434.0" prefWidth="336.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.artifactcataloggg.controller.UIController">
    <children>
       <BorderPane prefHeight="440.0" prefWidth="336.0">
          <center>
@@ -83,7 +83,7 @@
                  <!-- Sağ tarafta "Edit" ve "OK" butonları -->
                  <HBox alignment="BOTTOM_RIGHT">
                      <Button text="Edit" fx:id="editButton"/>
-                     <Button text="OK" fx:id="okButton"/>
+                     <Button text="OK" fx:id="okButton" onAction="#handleAddArtifact"/>
                  </HBox>
              </HBox>
 

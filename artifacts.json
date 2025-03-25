@@ -1,0 +1,76 @@
+[
+  {
+    "artifactID": "A1",
+    "artifactName": "Ancient Vase",
+    "category": "Pottery",
+    "civilization": "Greek",
+    "discoveryLocation": "Athens",
+    "composition": "Clay",
+    "discoveryDate": "500 BC",
+    "currentPlace": "Louvre Museum",
+    "width": 10.5,
+    "length": 10.5,
+    "height": 20.0,
+    "weight": 2.5,
+    "tags": [
+      "antique",
+      "museum",
+      "greek"
+    ]
+  },
+  {
+    "artifactID": "A003",
+    "artifactName": "Ancient Vase",
+    "category": "Ceramic",
+    "civilization": "Greek",
+    "discoveryLocation": "Athens",
+    "composition": "Clay",
+    "discoveryDate": "500 BC",
+    "currentPlace": "British Museum",
+    "width": 30.0,
+    "length": 30.0,
+    "height": 30.0,
+    "weight": 30.0,
+    "tags": [
+      "Antique",
+      "Greek",
+      "Handmade"
+    ]
+  },
+  {
+    "artifactID": "A004",
+    "artifactName": "Ancient Sword",
+    "category": "Metal",
+    "civilization": "Ancient",
+    "discoveryLocation": "Rome",
+    "composition": "Gold",
+    "discoveryDate": "200 BC",
+    "currentPlace": "Museum",
+    "width": 10.0,
+    "length": 10.0,
+    "height": 10.0,
+    "weight": 10.0,
+    "tags": [
+      "Ancient",
+      "Gold"
+    ]
+  },
+  {
+    "artifactID": "A005",
+    "artifactName": "Ancient Sword",
+    "category": "Metal",
+    "civilization": "Ancient",
+    "discoveryLocation": "Rome",
+    "composition": "Gold",
+    "discoveryDate": "200 BC",
+    "currentPlace": "Museum",
+    "width": 10.0,
+    "length": 10.0,
+    "height": 10.0,
+    "weight": 10.0,
+    "tags": [
+      "Ancient",
+      "Gold"
+    ]
+  }
+]
