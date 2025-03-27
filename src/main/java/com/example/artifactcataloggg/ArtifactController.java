@@ -26,7 +26,7 @@ public class ArtifactController {
         }
 
         Artifact newArtifact = new Artifact(id, name, "Metal", "Ancient", "Rome",
-                "Gold", "200 BC", "Museum", 10, 10, 10, 10, Arrays.asList("Ancient", "Gold"));
+                "Gold", "200 BC", "Museum", 10, 10, 10, 10, Arrays.asList("Ancient", "Gold"), "image.path");
 
         createArtifact(newArtifact);
 

@@ -75,7 +75,7 @@
              <HBox spacing="10">
                  <!-- Sol tarafta "Browse Image" butonu -->
                  <HBox alignment="BOTTOM_LEFT">
-                     <Button text="Browse Image" fx:id="browseButton"/>
+                     <Button text="Browse Image" fx:id="browseButton" onAction="#handleSelectImage"/>
                  </HBox>
 
                  <Region HBox.hgrow="ALWAYS"/> <!-- Butonları ayırmak için boşluk bırak -->

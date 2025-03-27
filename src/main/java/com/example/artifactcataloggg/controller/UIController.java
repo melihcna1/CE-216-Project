@@ -5,6 +5,10 @@ import com.example.artifactcataloggg.ArtifactRepository;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,6 +42,12 @@ public class UIController {
     private TextField tagsField;
     @FXML
     private Button okButton;
+    @FXML
+    private Button selectImageButton; // Resim seçme butonu
+    @FXML
+    private ImageView artifactImageView; // Seçilen resmi gösterecek alan
+
+    private String selectedImagePath = null; // Seçilen resmin yolu
 
     private ArtifactRepository artifactRepository = new ArtifactRepository();
 
@@ -60,7 +70,7 @@ public class UIController {
 
             Artifact newArtifact = new Artifact(artifactID, name, category, civilization,
                     discoveryLocation, composition, discoveryDate,
-                    currentPlace, width, length, height, weight, tags);
+                    currentPlace, width, length, height, weight, tags, selectedImagePath);
 
             artifactRepository.addArtifact(newArtifact);
 
@@ -71,6 +81,18 @@ public class UIController {
 
         } catch (NumberFormatException e) {
             System.out.println("Hata: Sayısal değerler yanlış girildi.");
+        }
+    }
+    @FXML
+    private void handleSelectImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
+        File selectedFile = fileChooser.showOpenDialog(null);
+
+        if (selectedFile != null) {
+            selectedImagePath = selectedFile.toURI().toString(); // JavaFX için uygun URI formatı
+            artifactImageView.setImage(new Image(selectedImagePath));
+            System.out.println("Seçilen resim: " + selectedImagePath);
         }
     }
 
@@ -88,5 +110,7 @@ public class UIController {
         heightField.clear();
         weightField.clear(); // Yeni eklenen alanı temizleme
         tagsField.clear();
+        artifactImageView.setImage(null);
+        selectedImagePath = null;
     }
 }

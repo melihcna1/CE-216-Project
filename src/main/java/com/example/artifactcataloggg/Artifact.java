@@ -23,7 +23,7 @@ public class Artifact {
     public Artifact(String artifactID, String artifactName, String category, String civilization,
                     String discoveryLocation, String composition, String discoveryDate,
                     String currentPlace, double width, double length, double height, double weight,
-                    List<String> tags) {
+                    List<String> tags, String imagePath) {
         this.artifactID = artifactID;
         this.artifactName = artifactName;
         this.category = category;
@@ -37,6 +37,7 @@ public class Artifact {
         this.height = height;
         this.weight = weight;
         this.tags = tags;
+        this.imagePath = imagePath;
     }
 
     // Getters and setters
