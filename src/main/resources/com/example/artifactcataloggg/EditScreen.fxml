@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import javafx.scene.layout.Region?>
+
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="434.0" prefWidth="336.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.artifactcataloggg.controller.UIController">
    <children>
       <BorderPane prefHeight="440.0" prefWidth="336.0">
@@ -52,18 +53,18 @@
                               <Label prefWidth="150.0" text="Length" GridPane.hgrow="ALWAYS" GridPane.rowIndex="9" />
                               <Label prefWidth="150.0" text="Height" GridPane.hgrow="ALWAYS" GridPane.rowIndex="10" />
                               <Label prefWidth="150.0" text="Tags" GridPane.hgrow="ALWAYS" GridPane.rowIndex="11" />
-                              <TextField GridPane.columnIndex="1" />
-                              <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                              <TextField GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                              <TextField GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                              <TextField GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                              <TextField GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                              <TextField GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                              <TextField GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                              <TextField GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                              <TextField GridPane.columnIndex="1" GridPane.rowIndex="9" />
-                              <TextField GridPane.columnIndex="1" GridPane.rowIndex="10" />
-                              <TextField GridPane.columnIndex="1" GridPane.rowIndex="11" />
+                               <TextField fx:id="artifactIdField" GridPane.columnIndex="1" />
+                               <TextField fx:id="artifactNameField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                               <TextField fx:id="categoryField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                               <TextField fx:id="civilizationField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                               <TextField fx:id="discoveryLocationField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                               <TextField fx:id="compositionField" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                               <TextField fx:id="discoveryDateField" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                               <TextField fx:id="currentPlaceField" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                               <TextField fx:id="widthField" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                               <TextField fx:id="lengthField" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                               <TextField fx:id="heightField" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                               <TextField fx:id="tagsField" GridPane.columnIndex="1" GridPane.rowIndex="11" />
                            </children>
                         </GridPane>
                      </center>
@@ -82,8 +83,8 @@
 
                  <!-- Sağ tarafta "Edit" ve "OK" butonları -->
                  <HBox alignment="BOTTOM_RIGHT">
-                     <Button text="Edit" fx:id="editButton"/>
-                     <Button text="OK" fx:id="okButton" onAction="#handleAddArtifact"/>
+                     <Button text="Edit" fx:id="editButton" onAction="#editArtifact"/>
+                     <Button text="OK" fx:id="okButton" onAction="#handleEditSave"/>
                  </HBox>
              </HBox>
 
