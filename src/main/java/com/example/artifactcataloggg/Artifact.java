@@ -1,5 +1,6 @@
 package com.example.artifactcataloggg;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // Data model representing an artifact entity
@@ -16,6 +17,7 @@ public class Artifact {
     private double weight;
     private List<String> tags;
     private String imagePath;
+
 
     // Constructors
     public Artifact() {}
@@ -39,6 +41,7 @@ public class Artifact {
         this.tags = tags;
         this.imagePath = imagePath;
     }
+
 
     // Getters and setters
     public String getArtifactID() { return artifactID; }
@@ -77,11 +80,29 @@ public class Artifact {
     public double getWeight() { return weight; }
     public void setWeight(double weight) { this.weight = weight; }
 
-    public List<String> getTags() { return tags; }
+    public List<String> getTags() {
+        return tags != null ? tags : new ArrayList<>();
+    }
+
     public void setTags(List<String> tags) { this.tags = tags; }
 
     public String getImagePath() { return imagePath; }
     public void setImagePath(String imagePath) { this.imagePath = imagePath; }
+
+
+
+    public void addTag(String tag) {
+        if (tags == null) tags = new ArrayList<>();
+        if (!tags.contains(tag.toLowerCase())) {
+            tags.add(tag.toLowerCase());
+        }
+    }
+
+    public void removeTag(String tag) {
+        if (tags != null) {
+            tags.remove(tag.toLowerCase());
+        }
+    }
 
     @Override
     public String toString() {

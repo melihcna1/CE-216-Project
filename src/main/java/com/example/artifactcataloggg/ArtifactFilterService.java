@@ -11,14 +11,18 @@ public class ArtifactFilterService {
         this.artifacts = artifacts;
     }
 
-    // Filters artifacts by checking if each artifact's tags contain all selected tags
+    // Filters artifacts that contain all selected tags
     public List<Artifact> filterByTags(List<String> selectedTags) {
-        List<Artifact> filtered = new ArrayList<>();
-        for (Artifact artifact : artifacts) {
-            if (artifact.getTags() != null && artifact.getTags().containsAll(selectedTags)) {
-                filtered.add(artifact);
-            }
-        }
-        return filtered;
+        return artifacts.stream()
+                .filter(artifact -> artifact.getTags().containsAll(selectedTags))
+                .toList();
+    }
+
+    // Filters artifacts that contain at least one of the selected tags
+    public List<Artifact> filterByAnyTag(List<String> selectedTags) {
+        return artifacts.stream()
+                .filter(artifact -> artifact.getTags().stream().anyMatch(selectedTags::contains))
+                .toList();
     }
 }
+
