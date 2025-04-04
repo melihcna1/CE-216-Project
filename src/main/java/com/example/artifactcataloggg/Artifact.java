@@ -41,6 +41,23 @@ public class Artifact {
         this.tags = tags;
         this.imagePath = imagePath;
     }
+    public Artifact(String artifactName, String imagePath) {
+        this.artifactID = "Unknown";
+        this.artifactName = artifactName;
+        this.category = "Unknown";
+        this.civilization = "Unknown";
+        this.discoveryLocation = "Unknown";
+        this.composition = "Unknown";
+        this.discoveryDate = "Unknown";
+        this.currentPlace = "Unknown";
+        this.width = 0;
+        this.length = 0;
+        this.height = 0;
+        this.weight = 0;
+        this.tags = new ArrayList<>();
+        this.imagePath = imagePath;
+    }
+
 
 
     // Getters and setters
