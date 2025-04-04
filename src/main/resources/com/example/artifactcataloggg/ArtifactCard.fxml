@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.artifactcataloggg.controller.ArtifactCardController"
+      alignment="CENTER" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10; -fx-border-radius: 10; -fx-background-radius: 10;">
+
+    <ImageView fx:id="artifactImageView" fitWidth="150" fitHeight="150" preserveRatio="true" />
+    <Label fx:id="artifactNameLabel" text="Artifact Name" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+</VBox>
