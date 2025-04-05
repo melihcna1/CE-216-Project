@@ -73,5 +73,8 @@ public class ArtifactRepository {
             return new ArrayList<>();
         }
     }
-
+    public boolean existsById(String id) {
+        return artifacts.stream()
+                .anyMatch(artifact -> artifact.getArtifactID().equals(id));
+    }
 }
