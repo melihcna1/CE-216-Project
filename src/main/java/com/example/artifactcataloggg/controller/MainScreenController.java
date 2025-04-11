@@ -1,25 +1,26 @@
 package com.example.artifactcataloggg.controller;
 
 import com.example.artifactcataloggg.Artifact;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
+import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class MainScreenController implements Initializable {
@@ -37,6 +38,9 @@ public class MainScreenController implements Initializable {
     private ListView<String> tagListView;
 
     private List<Artifact> allArtifacts = new ArrayList<>();
+    @FXML
+    private TableView<Artifact> artifactTable;
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -110,7 +114,7 @@ public class MainScreenController implements Initializable {
                     System.out.println("Görsel dosyası gerçekten yok: " + file.getAbsolutePath());
 
                     // Placeholder kullan
-                    InputStream placeholderStream = getClass().getResourceAsStream("/com/example/artifactcataloggg/placeholder.png");
+                    InputStream placeholderStream = getClass().getResourceAsStream("/artifactImages/placeholder.png");
                     if (placeholderStream != null) {
                         imageView.setImage(new Image(placeholderStream, 100, 100, true, true));
                     } else {
@@ -125,7 +129,38 @@ public class MainScreenController implements Initializable {
             box.getChildren().addAll(imageView, nameLabel);
             return box;
         }
+    @FXML
+    private void onAddButtonClick(ActionEvent event) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
+        Parent root = fxmlLoader.load();
 
+        EditScreenController controller = fxmlLoader.getController();
+        controller.setEditMode(false, null); // Add mode
 
-
+        Stage stage = new Stage();
+        stage.setTitle("Add New Artifact");
+        stage.setScene(new Scene(root));
+        stage.show();
     }
+
+    @FXML
+    private void onEditButtonClick(ActionEvent event) throws IOException {
+        Artifact selected = artifactTable.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        EditScreenController controller = fxmlLoader.getController();
+        controller.setEditMode(true, selected); // Edit mode
+
+        Stage stage = new Stage();
+        stage.setTitle("Edit Artifact");
+        stage.setScene(new Scene(root));
+        stage.show();
+    }
+
+
+
+
+}

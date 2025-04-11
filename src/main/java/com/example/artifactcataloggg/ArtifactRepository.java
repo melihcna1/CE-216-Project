@@ -13,10 +13,19 @@ public class ArtifactRepository {
     private static final String FILE_PATH = "artifacts.json";
     private List<Artifact> artifacts;
     private Gson gson;
+    private static ArtifactRepository instance;
+
+
 
     public ArtifactRepository() {
         this.gson = new GsonBuilder().setPrettyPrinting().create();
         this.artifacts = loadArtifacts();
+    }
+    public static ArtifactRepository getInstance() {
+        if (instance == null) {
+            instance = new ArtifactRepository();
+        }
+        return instance;
     }
 
     public List<Artifact> getArtifacts() {
@@ -42,6 +51,10 @@ public class ArtifactRepository {
             }
         }
     }
+    public void updateArtifact(Artifact artifact) {
+        updateArtifact(artifact.getArtifactID(), artifact);
+    }
+
 
     public void deleteArtifact(String artifactID) {
         artifacts.removeIf(a -> a.getArtifactID().equals(artifactID));
