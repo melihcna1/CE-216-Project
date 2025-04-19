@@ -1,6 +1,9 @@
 package com.example.artifactcataloggg.controller;
 
 import com.example.artifactcataloggg.Artifact;
+import com.example.artifactcataloggg.ArtifactRepository;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -41,6 +44,12 @@ public class MainScreenController implements Initializable {
     @FXML
     private TableView<Artifact> artifactTable;
 
+    @FXML
+    private ListView<Artifact> artifactListView;
+
+    private ObservableList<Artifact> artifactData = FXCollections.observableArrayList();
+    private ArtifactRepository artifactRepository = new ArtifactRepository();
+    private Artifact selectedArtifact = null;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -127,6 +136,10 @@ public class MainScreenController implements Initializable {
             imageView.setFitHeight(100);
 
             box.getChildren().addAll(imageView, nameLabel);
+        box.setOnMouseClicked(event -> {
+            selectedArtifact = artifact;
+            highlightSelectedCard(box);
+        });
             return box;
         }
     @FXML
@@ -159,7 +172,35 @@ public class MainScreenController implements Initializable {
         stage.setScene(new Scene(root));
         stage.show();
     }
+    @FXML
+    private void deleteArtifact() {
+        if (selectedArtifact == null) {
+            showAlert("Silinecek artifact seçilmedi.");
+            return;
+        }
 
+        allArtifacts.remove(selectedArtifact);
+        displayArtifacts(allArtifacts);
+        artifactRepository.deleteArtifact(selectedArtifact.getArtifactID());
+
+        System.out.println("Artifact silindi: " + selectedArtifact.getArtifactID());
+        selectedArtifact = null;
+    }
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Hata");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    private void highlightSelectedCard(VBox selectedCard) {
+        for (javafx.scene.Node node : artifactGrid.getChildren()) {
+            if (node instanceof VBox) {
+                node.setStyle("-fx-border-color: rgb(128,128,128); -fx-border-radius: 5; -fx-background-color: #f4f4f4;");
+            }
+        }
+        selectedCard.setStyle("-fx-border-color: blue; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-color: #e0f0ff;");
+    }
 
 
 

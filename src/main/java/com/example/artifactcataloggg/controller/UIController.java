@@ -148,18 +148,6 @@ public class UIController {
         selectedImagePath = null;
     }
 
-    @FXML
-    private void deleteArtifact() {
-        Artifact selected = artifactListView.getSelectionModel().getSelectedItem();
-
-        if (selected != null) {
-            artifactData.remove(selected);
-            artifactRepository.deleteArtifact(selected.getArtifactID());
-            System.out.println("Artifact silindi: " + selected.getArtifactID());
-        } else {
-            showAlert("Silinecek artifact seçilmedi.");
-        }
-    }
 
     @FXML
     private void editArtifact() {
