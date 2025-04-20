@@ -86,6 +86,33 @@ public class ArtifactRepository {
             return new ArrayList<>();
         }
     }
+    public void importFromJson(String filePath) {
+        File file = new File(filePath);
+
+        if (!file.exists() || file.length() == 0) {
+            System.out.println("Dosya bulunamadı veya boş: " + filePath);
+            return;
+        }
+
+        try (Reader reader = new FileReader(file)) {
+            Type artifactListType = new TypeToken<List<Artifact>>() {}.getType();
+            List<Artifact> importedArtifacts = gson.fromJson(reader, artifactListType);
+
+            for (Artifact artifact : importedArtifacts) {
+                if (!existsById(artifact.getArtifactID())) {
+                    artifacts.add(artifact);
+                } else {
+                    System.out.println("Zaten mevcut: " + artifact.getArtifactID());
+                }
+            }
+
+            saveArtifacts();
+            System.out.println("Veriler başarıyla içe aktarıldı: " + filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public boolean existsById(String id) {
         return artifacts.stream()
                 .anyMatch(artifact -> artifact.getArtifactID().equals(id));

@@ -2,9 +2,14 @@ package com.example.artifactcataloggg;
 
 import java.util.Arrays;
 import java.util.List;
+
+import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 public class ArtifactController {
+
+
     private ArtifactRepository repository;
 
     public ArtifactController() {

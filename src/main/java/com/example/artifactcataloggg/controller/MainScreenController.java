@@ -39,7 +39,7 @@ public class MainScreenController implements Initializable {
 
     @FXML
     private ListView<String> tagListView;
-
+    private ArtifactRepository repository;
     private List<Artifact> allArtifacts = new ArrayList<>();
     @FXML
     private TableView<Artifact> artifactTable;
@@ -70,6 +70,9 @@ public class MainScreenController implements Initializable {
             displayArtifacts(filtered);
         });
     }
+    public MainScreenController() {
+        this.repository = new ArtifactRepository();
+    }
 
     private void loadArtifacts() {
 
@@ -98,7 +101,18 @@ public class MainScreenController implements Initializable {
             }
         }
     }
-
+    public void loadArtifacts(ActionEvent event) {
+        List<Artifact> artifacts = repository.loadArtifacts();
+        artifacts.forEach(artifact ->
+                System.out.println("Loaded Artifact: " + artifact.getArtifactID() + " - " + artifact.getArtifactName())
+        );
+    }
+    public void importFromJson(ActionEvent event) {
+        String filePath = "src/main/resources/artifacts.json";;
+        repository.importFromJson(filePath);
+        allArtifacts = repository.getArtifacts();
+        displayArtifacts(allArtifacts);
+    }
     private VBox createArtifactCard(Artifact artifact) {
             VBox box = new VBox();
             box.setSpacing(5);
