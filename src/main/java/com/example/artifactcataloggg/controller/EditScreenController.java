@@ -26,7 +26,8 @@ public class EditScreenController {
     @FXML private TextField heightField;
     @FXML private TextField weightField;
     @FXML private TextArea tagsArea;
-
+    @FXML private javafx.scene.image.ImageView artifactImageView;
+    private String selectedImagePath = null;
     private boolean isEditMode = false;
     private Artifact artifact;
 
@@ -78,7 +79,26 @@ public class EditScreenController {
         a.setHeight(Double.parseDouble(heightField.getText()));
         a.setWeight(Double.parseDouble(weightField.getText()));
         a.setTags(Arrays.asList(tagsArea.getText().split(",\s*")));
+        if (selectedImagePath != null) {
+            a.setImagePath(selectedImagePath);
+        }
+
     }
+    @FXML
+    private void onAddImageClick(ActionEvent event) {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Select Artifact Image");
+        fileChooser.getExtensionFilters().addAll(
+                new javafx.stage.FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
+        );
+        java.io.File selectedFile = fileChooser.showOpenDialog(((Node) event.getSource()).getScene().getWindow());
+        if (selectedFile != null) {
+            selectedImagePath = selectedFile.getAbsolutePath();
+            artifactImageView.setImage(new javafx.scene.image.Image(selectedFile.toURI().toString()));
+        }
+    }
+
+
 
     @FXML
     private void onCancelClick(ActionEvent event) {

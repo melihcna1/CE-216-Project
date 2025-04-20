@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
+<?import javafx.scene.image.ImageView?>
 <AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.artifactcataloggg.controller.EditScreenController">
@@ -48,6 +49,8 @@
             <HBox spacing="10" alignment="CENTER_RIGHT">
                 <Button text="Save" onAction="#onSaveClick"/>
                 <Button text="Cancel" onAction="#onCancelClick"/>
+                <Button fx:id="addImageButton" text="Add Image" onAction="#onAddImageClick" />
+                <ImageView fx:id="artifactImageView" fitHeight="150" fitWidth="150" />
             </HBox>
         </children>
         <padding>
