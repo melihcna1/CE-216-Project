@@ -30,6 +30,10 @@ public class EditScreenController {
     private String selectedImagePath = null;
     private boolean isEditMode = false;
     private Artifact artifact;
+    private Runnable onArtifactSaved;
+    public void setOnArtifactSaved(Runnable callback) {
+        this.onArtifactSaved = callback;
+    }
 
     public void setEditMode(boolean isEdit, Artifact artifact) {
         this.isEditMode = isEdit;
@@ -61,6 +65,9 @@ public class EditScreenController {
             newArtifact.setArtifactID(UUID.randomUUID().toString());
             updateArtifactFromFields(newArtifact);
             ArtifactRepository.getInstance().addArtifact(newArtifact);
+        }
+        if (onArtifactSaved != null) {
+            onArtifactSaved.run();
         }
 
         closeWindow(event);

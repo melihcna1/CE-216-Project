@@ -35,7 +35,8 @@
       "Antique",
       "Greek",
       "Handmade"
-    ]
+    ],
+    "imagePath": "C:\\Users\\Gedik\\Desktop\\indir.jpeg"
   },
   {
     "artifactID": "A004",
@@ -75,7 +76,7 @@
   },
   {
     "artifactID": "Unknown",
-    "artifactName": "New Coin",
+    "artifactName": "Old Coins",
     "category": "Unknown",
     "civilization": "Unknown",
     "discoveryLocation": "Unknown",
@@ -104,6 +105,23 @@
     "length": 23.0,
     "height": 12.0,
     "weight": 11.0,
+    "tags": [
+      ""
+    ]
+  },
+  {
+    "artifactID": "15134c91-7095-4cf2-9f1d-cc022d60162d",
+    "artifactName": "a",
+    "category": "a",
+    "civilization": "a",
+    "discoveryLocation": "a",
+    "composition": "a",
+    "discoveryDate": "02.02.2022",
+    "currentPlace": "a",
+    "width": 21.0,
+    "length": 32.0,
+    "height": 33.0,
+    "weight": 34.0,
     "tags": [
       ""
     ]

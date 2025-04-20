@@ -75,12 +75,10 @@ public class MainScreenController implements Initializable {
     }
 
     private void loadArtifacts() {
-
-        allArtifacts.add(new Artifact("Ancient Vase", "artifactImages/vase.jpeg"));
-        allArtifacts.add(new Artifact("Old Coin", "artifactImages/coin.jpg"));
-        allArtifacts.add(new Artifact("Historic Sword", "artifactImages/sword.jpg"));
-
+        allArtifacts.clear();
+        allArtifacts.addAll(artifactRepository.getArtifacts()); // JSON'dan oku
     }
+
 
     private void displayArtifacts(List<Artifact> artifacts) {
         artifactGrid.getChildren().clear();
@@ -198,6 +196,12 @@ public class MainScreenController implements Initializable {
 
                     EditScreenController controller = loader.getController();
                     controller.setEditMode(true, artifact);
+                    controller.setOnArtifactSaved(() -> {
+                        artifactRepository.reloadArtifactsFromFile();  // JSON'dan güncel listeyi yükle
+                        allArtifacts = artifactRepository.getArtifacts();
+                        displayArtifacts(allArtifacts);
+                    });
+
 
                     Stage stage = new Stage();
                     stage.setTitle("Edit Artifact");
@@ -238,6 +242,13 @@ public class MainScreenController implements Initializable {
 
             EditScreenController controller = loader.getController();
             controller.setEditMode(true, selectedArtifact);
+            controller.setOnArtifactSaved(() -> {
+                artifactRepository.reloadArtifactsFromFile();  // JSON'dan güncel listeyi yükle
+                allArtifacts = artifactRepository.getArtifacts();
+                displayArtifacts(allArtifacts);
+            });
+
+
 
             Stage stage = new Stage();
             stage.setTitle("Edit Artifact");
@@ -255,6 +266,12 @@ public class MainScreenController implements Initializable {
 
             EditScreenController controller = loader.getController();
             controller.setEditMode(false, null); // Yeni artifact ekleme modu
+            controller.setOnArtifactSaved(() -> {
+                artifactRepository.reloadArtifactsFromFile();  // JSON'dan güncel listeyi yükle
+                allArtifacts = artifactRepository.getArtifacts();
+                displayArtifacts(allArtifacts);
+            });
+
 
             Stage stage = new Stage();
             stage.setTitle("Add New Artifact");

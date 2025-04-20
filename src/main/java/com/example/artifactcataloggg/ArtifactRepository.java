@@ -117,4 +117,7 @@ public class ArtifactRepository {
         return artifacts.stream()
                 .anyMatch(artifact -> artifact.getArtifactID().equals(id));
     }
+    public void reloadArtifactsFromFile() {
+        this.artifacts = loadArtifacts();
+    }
 }
