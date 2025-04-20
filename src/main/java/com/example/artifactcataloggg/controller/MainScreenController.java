@@ -2,6 +2,8 @@ package com.example.artifactcataloggg.controller;
 
 import com.example.artifactcataloggg.Artifact;
 import com.example.artifactcataloggg.ArtifactRepository;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -18,9 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,18 +101,52 @@ public class MainScreenController implements Initializable {
             }
         }
     }
-    public void loadArtifacts(ActionEvent event) {
-        List<Artifact> artifacts = repository.loadArtifacts();
-        artifacts.forEach(artifact ->
-                System.out.println("Loaded Artifact: " + artifact.getArtifactID() + " - " + artifact.getArtifactName())
+    @FXML
+    public void exportToJson(ActionEvent event) {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Export Artifacts to JSON");
+        fileChooser.getExtensionFilters().add(
+                new javafx.stage.FileChooser.ExtensionFilter("JSON Files", "*.json")
         );
+
+        // Set default directory to Desktop
+        String userDesktop = System.getProperty("user.home") + "/Desktop";
+        fileChooser.setInitialDirectory(new File(userDesktop));
+
+        // Show save dialog
+        File file = fileChooser.showSaveDialog(null);
+
+        if (file != null) {
+            try (Writer writer = new FileWriter(file)) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                gson.toJson(allArtifacts, writer);
+                System.out.println("Artifacts exported successfully to: " + file.getAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+                showAlert("Error exporting artifacts to JSON.");
+            }
+        } else {
+            System.out.println("Export canceled by user.");
+        }
     }
-    public void importFromJson(ActionEvent event) {
-        String filePath = "src/main/resources/artifacts.json";;
-        repository.importFromJson(filePath);
-        allArtifacts = repository.getArtifacts();
-        displayArtifacts(allArtifacts);
+    @FXML
+    public void handleImportJson(ActionEvent event) {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Import Artifact JSON");
+        fileChooser.getExtensionFilters().add(
+                new javafx.stage.FileChooser.ExtensionFilter("JSON Files", "*.json")
+        );
+
+        java.io.File selectedFile = fileChooser.showOpenDialog(null); // or pass the Stage if you have one
+
+        if (selectedFile != null) {
+            System.out.println("Seçilen dosya: " + selectedFile.getAbsolutePath());
+            ArtifactRepository.getInstance().importFromJson(selectedFile.getAbsolutePath());
+        } else {
+            System.out.println("Dosya seçimi iptal edildi.");
+        }
     }
+
     private VBox createArtifactCard(Artifact artifact) {
             VBox box = new VBox();
             box.setSpacing(5);

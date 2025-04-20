@@ -72,5 +72,40 @@
       "Ancient",
       "Gold"
     ]
+  },
+  {
+    "artifactID": "Unknown",
+    "artifactName": "New Coin",
+    "category": "Unknown",
+    "civilization": "Unknown",
+    "discoveryLocation": "Unknown",
+    "composition": "Unknown",
+    "discoveryDate": "Unknown",
+    "currentPlace": "Unknown",
+    "width": 0.0,
+    "length": 0.0,
+    "height": 0.0,
+    "weight": 0.0,
+    "tags": [
+      ""
+    ],
+    "imagePath": "artifactImages/coin.jpg"
+  },
+  {
+    "artifactID": "80acc57e-7813-455b-aeb6-cf5539e6b928",
+    "artifactName": "melih",
+    "category": "murat",
+    "civilization": "turat",
+    "discoveryLocation": "kolat",
+    "composition": "burat",
+    "discoveryDate": "02.02.2022",
+    "currentPlace": "lolat",
+    "width": 12.0,
+    "length": 23.0,
+    "height": 12.0,
+    "weight": 11.0,
+    "tags": [
+      ""
+    ]
   }
 ]

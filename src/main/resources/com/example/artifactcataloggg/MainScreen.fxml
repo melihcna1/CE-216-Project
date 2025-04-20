@@ -25,8 +25,8 @@
                 <menus>
                     <Menu text="File">
                         <items>
-                            <MenuItem text="Import JSON"  onAction="#loadArtifacts"/>
-                            <MenuItem text="Export JSON" onAction="#importFromJson" />
+                            <MenuItem text="Import JSON"  onAction="#handleImportJson"/>
+                            <MenuItem text="Export JSON" onAction="#exportToJson" />
                         </items>
                     </Menu>
                     <Menu text="Edit">
