@@ -46,6 +46,8 @@ public class MainScreenController implements Initializable {
 
     @FXML
     private ListView<Artifact> artifactListView;
+    @FXML
+    private Button editButton;
 
     private ObservableList<Artifact> artifactData = FXCollections.observableArrayList();
     private ArtifactRepository artifactRepository = new ArtifactRepository();
@@ -122,7 +124,6 @@ public class MainScreenController implements Initializable {
                 } else {
                     System.out.println("Görsel dosyası gerçekten yok: " + file.getAbsolutePath());
 
-                    // Placeholder kullan
                     InputStream placeholderStream = getClass().getResourceAsStream("/artifactImages/placeholder.png");
                     if (placeholderStream != null) {
                         imageView.setImage(new Image(placeholderStream, 100, 100, true, true));
@@ -137,10 +138,30 @@ public class MainScreenController implements Initializable {
 
             box.getChildren().addAll(imageView, nameLabel);
         box.setOnMouseClicked(event -> {
+
             selectedArtifact = artifact;
             highlightSelectedCard(box);
+
+
+            if (event.getClickCount() == 2) {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
+                    Parent root = loader.load();
+
+                    EditScreenController controller = loader.getController();
+                    controller.setEditMode(true, artifact);
+
+                    Stage stage = new Stage();
+                    stage.setTitle("Edit Artifact");
+                    stage.setScene(new Scene(root));
+                    stage.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         });
-            return box;
+
+        return box;
         }
     @FXML
     private void onAddButtonClick(ActionEvent event) throws IOException {
@@ -157,21 +178,46 @@ public class MainScreenController implements Initializable {
     }
 
     @FXML
-    private void onEditButtonClick(ActionEvent event) throws IOException {
-        Artifact selected = artifactTable.getSelectionModel().getSelectedItem();
-        if (selected == null) return;
+    private void handleEditMenu(ActionEvent event) {
+        if (selectedArtifact == null) {
+            System.out.println("No artifact selected.");
+            return;
+        }
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
-        Parent root = fxmlLoader.load();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
+            Parent root = loader.load();
 
-        EditScreenController controller = fxmlLoader.getController();
-        controller.setEditMode(true, selected); // Edit mode
+            EditScreenController controller = loader.getController();
+            controller.setEditMode(true, selectedArtifact);
 
-        Stage stage = new Stage();
-        stage.setTitle("Edit Artifact");
-        stage.setScene(new Scene(root));
-        stage.show();
+            Stage stage = new Stage();
+            stage.setTitle("Edit Artifact");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+    @FXML
+    private void handleAddMenu(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
+            Parent root = loader.load();
+
+            EditScreenController controller = loader.getController();
+            controller.setEditMode(false, null); // Yeni artifact ekleme modu
+
+            Stage stage = new Stage();
+            stage.setTitle("Add New Artifact");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     @FXML
     private void deleteArtifact() {
         if (selectedArtifact == null) {
