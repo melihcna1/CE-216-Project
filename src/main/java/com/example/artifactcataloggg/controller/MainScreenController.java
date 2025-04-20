@@ -144,15 +144,20 @@ public class MainScreenController implements Initializable {
                 new javafx.stage.FileChooser.ExtensionFilter("JSON Files", "*.json")
         );
 
-        java.io.File selectedFile = fileChooser.showOpenDialog(null); // or pass the Stage if you have one
+        File selectedFile = fileChooser.showOpenDialog(null);
 
         if (selectedFile != null) {
             System.out.println("Seçilen dosya: " + selectedFile.getAbsolutePath());
             ArtifactRepository.getInstance().importFromJson(selectedFile.getAbsolutePath());
+            allArtifacts.clear();
+            allArtifacts.addAll(ArtifactRepository.getInstance().getArtifacts());
+            displayArtifacts(allArtifacts);
+            refreshTags();
         } else {
             System.out.println("Dosya seçimi iptal edildi.");
         }
     }
+
 
     private VBox createArtifactCard(Artifact artifact) {
             VBox box = new VBox();
@@ -163,35 +168,40 @@ public class MainScreenController implements Initializable {
             Label nameLabel = new Label(artifact.getArtifactName());
             nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
 
-            ImageView imageView = new ImageView();
-            String imagePath = "/" + artifact.getImagePath();
+        ImageView imageView = new ImageView();
+        String imagePath = artifact.getImagePath();
 
-            InputStream imageStream = getClass().getResourceAsStream(imagePath);
+        if (imagePath != null && !imagePath.isEmpty()) {
+            Image img;
+            File file = new File(imagePath);
 
-            if (imageStream != null) {
-                imageView.setImage(new Image(imageStream, 100, 100, true, true));
+            if (file.exists()) {
+                // Dosya sisteminden gelen görsel (dış dosya)
+                img = new Image(file.toURI().toString(), 100, 100, true, true);
             } else {
-                System.out.println("Görsel yüklenemedi: " + imagePath);
-
-                File file = new File("src/main/resources" + imagePath);
-                if (file.exists()) {
-                    imageView.setImage(new Image(file.toURI().toString(), 100, 100, true, true));
+                // Proje içinden (resources klasörü) yüklemeye çalış
+                InputStream imageStream = getClass().getResourceAsStream("/" + imagePath);
+                if (imageStream != null) {
+                    img = new Image(imageStream, 100, 100, true, true);
                 } else {
-                    System.out.println("Görsel dosyası gerçekten yok: " + file.getAbsolutePath());
-
+                    System.out.println("Görsel bulunamadı, placeholder kullanılacak: " + imagePath);
                     InputStream placeholderStream = getClass().getResourceAsStream("/artifactImages/placeholder.png");
-                    if (placeholderStream != null) {
-                        imageView.setImage(new Image(placeholderStream, 100, 100, true, true));
-                    } else {
-                        System.out.println("Placeholder da yüklenemedi!");
-                    }
+                    img = new Image(placeholderStream, 100, 100, true, true);
                 }
             }
 
-            imageView.setFitWidth(100);
-            imageView.setFitHeight(100);
+            imageView.setImage(img);
+        } else {
+            // Görsel yolu boşsa placeholder göster
+            InputStream placeholderStream = getClass().getResourceAsStream("/artifactImages/placeholder.png");
+            imageView.setImage(new Image(placeholderStream, 100, 100, true, true));
+        }
 
-            box.getChildren().addAll(imageView, nameLabel);
+        imageView.setFitWidth(100);
+        imageView.setFitHeight(100);
+
+
+        box.getChildren().addAll(imageView, nameLabel);
         box.setOnMouseClicked(event -> {
 
             selectedArtifact = artifact;

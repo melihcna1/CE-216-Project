@@ -19,6 +19,40 @@
     ]
   },
   {
+    "artifactID": "A005",
+    "artifactName": "Ancient Sword",
+    "category": "Metal",
+    "civilization": "Ancient",
+    "discoveryLocation": "Rome",
+    "composition": "Gold",
+    "discoveryDate": "200 BC",
+    "currentPlace": "Museum",
+    "width": 10.0,
+    "length": 10.0,
+    "height": 10.0,
+    "weight": 10.0,
+    "tags": [
+      "Ancient",
+      "Gold"
+    ]
+  },
+  {
+    "artifactID": "Unknown",
+    "artifactName": "Old Coins",
+    "category": "Unknown",
+    "civilization": "Unknown",
+    "discoveryLocation": "Unknown",
+    "composition": "Unknown",
+    "discoveryDate": "Unknown",
+    "currentPlace": "Unknown",
+    "width": 0.0,
+    "length": 0.0,
+    "height": 0.0,
+    "weight": 0.0,
+    "tags": [],
+    "imagePath": "artifactImages/coin.jpg"
+  },
+  {
     "artifactID": "A003",
     "artifactName": "Ancient Vase",
     "category": "Ceramic",
@@ -54,57 +88,6 @@
     "tags": [
       "Ancient",
       "Gold"
-    ]
-  },
-  {
-    "artifactID": "A005",
-    "artifactName": "Ancient Sword",
-    "category": "Metal",
-    "civilization": "Ancient",
-    "discoveryLocation": "Rome",
-    "composition": "Gold",
-    "discoveryDate": "200 BC",
-    "currentPlace": "Museum",
-    "width": 10.0,
-    "length": 10.0,
-    "height": 10.0,
-    "weight": 10.0,
-    "tags": [
-      "Ancient",
-      "Gold"
-    ]
-  },
-  {
-    "artifactID": "Unknown",
-    "artifactName": "Old Coins",
-    "category": "Unknown",
-    "civilization": "Unknown",
-    "discoveryLocation": "Unknown",
-    "composition": "Unknown",
-    "discoveryDate": "Unknown",
-    "currentPlace": "Unknown",
-    "width": 0.0,
-    "length": 0.0,
-    "height": 0.0,
-    "weight": 0.0,
-    "tags": [],
-    "imagePath": "artifactImages/coin.jpg"
-  },
-  {
-    "artifactID": "536d5374-0062-4392-af63-1643c95327be",
-    "artifactName": "alpr",
-    "category": "a",
-    "civilization": "a",
-    "discoveryLocation": "a",
-    "composition": "a",
-    "discoveryDate": "02.02.2002",
-    "currentPlace": "a",
-    "width": 21.0,
-    "length": 22.0,
-    "height": 233.0,
-    "weight": 23.0,
-    "tags": [
-      "alp"
     ]
   }
 ]
