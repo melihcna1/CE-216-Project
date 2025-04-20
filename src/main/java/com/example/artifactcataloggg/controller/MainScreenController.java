@@ -55,12 +55,9 @@ public class MainScreenController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
         loadArtifacts();
-
-
         displayArtifacts(allArtifacts);
-
+        refreshTags(); // Tüm tag'leri göster
 
         searchButton.setOnAction(event -> {
             String query = searchField.getText().toLowerCase();
@@ -69,7 +66,19 @@ public class MainScreenController implements Initializable {
                     .toList();
             displayArtifacts(filtered);
         });
+
+        // ✅ Tag ListView tıklanınca filtreleme yap
+        tagListView.setOnMouseClicked(event -> {
+            String selectedTag = tagListView.getSelectionModel().getSelectedItem();
+            if (selectedTag != null) {
+                List<Artifact> filtered = allArtifacts.stream()
+                        .filter(a -> a.getTags() != null && a.getTags().contains(selectedTag))
+                        .toList();
+                displayArtifacts(filtered);
+            }
+        });
     }
+
     public MainScreenController() {
         this.repository = new ArtifactRepository();
     }
@@ -189,6 +198,8 @@ public class MainScreenController implements Initializable {
             highlightSelectedCard(box);
 
 
+
+
             if (event.getClickCount() == 2) {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
@@ -260,6 +271,7 @@ public class MainScreenController implements Initializable {
     }
     @FXML
     private void handleAddMenu(ActionEvent event) {
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
             Parent root = loader.load();
@@ -312,6 +324,25 @@ public class MainScreenController implements Initializable {
         }
         selectedCard.setStyle("-fx-border-color: blue; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-color: #e0f0ff;");
     }
+    public void refreshTags() {
+        this.allArtifacts = artifactRepository.getArtifacts();
+
+        List<String> allTags = new ArrayList<>();
+        for (Artifact artifact : allArtifacts) {
+            if (artifact.getTags() != null) {
+                for (String tag : artifact.getTags()) {
+                    tag = tag.trim();
+                    if (!tag.isEmpty() && !allTags.contains(tag)) {
+                        allTags.add(tag);
+                    }
+                }
+            }
+        }
+
+        tagListView.setItems(FXCollections.observableArrayList(allTags));
+    }
+
+
 
 
 

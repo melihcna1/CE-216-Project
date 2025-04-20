@@ -27,10 +27,13 @@ public class EditScreenController {
     @FXML private TextField weightField;
     @FXML private TextArea tagsArea;
     @FXML private javafx.scene.image.ImageView artifactImageView;
+
     private String selectedImagePath = null;
     private boolean isEditMode = false;
     private Artifact artifact;
     private Runnable onArtifactSaved;
+
+
     public void setOnArtifactSaved(Runnable callback) {
         this.onArtifactSaved = callback;
     }
@@ -66,12 +69,14 @@ public class EditScreenController {
             updateArtifactFromFields(newArtifact);
             ArtifactRepository.getInstance().addArtifact(newArtifact);
         }
+
         if (onArtifactSaved != null) {
             onArtifactSaved.run();
         }
 
         closeWindow(event);
     }
+
 
     private void updateArtifactFromFields(Artifact a) {
         a.setArtifactName(artifactNameField.getText());
