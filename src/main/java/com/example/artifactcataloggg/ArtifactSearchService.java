@@ -32,15 +32,22 @@ public class ArtifactSearchService {
     private double getMatchScore(Artifact artifact, String query) {
         double score = 0.0;
 
+        if (artifact.getArtifactID().toLowerCase().contains(query)) score += 10;
         if (artifact.getArtifactName().toLowerCase().contains(query)) score += 10;
         if (artifact.getCategory().toLowerCase().contains(query)) score += 8;
-        if (artifact.getCivilization().toLowerCase().contains(query)) score += 6;
-        if (artifact.getDiscoveryLocation().toLowerCase().contains(query)) score += 5;
-        if (artifact.getComposition().toLowerCase().contains(query)) score += 4;
-        if (artifact.getCurrentPlace().toLowerCase().contains(query)) score += 3;
+        if (artifact.getCivilization().toLowerCase().contains(query)) score += 8;
+        if (artifact.getDiscoveryLocation().toLowerCase().contains(query)) score += 6;
+        if (artifact.getComposition().toLowerCase().contains(query)) score += 6;
+        if (artifact.getDiscoveryDate().toLowerCase().contains(query)) score += 5;
+        if (artifact.getCurrentPlace().toLowerCase().contains(query)) score += 5;
+        if (Double.toString(artifact.getWidth()).contains(query)) score += 4;
+        if (Double.toString(artifact.getLength()).contains(query)) score += 4;
+        if (Double.toString(artifact.getHeight()).contains(query)) score += 4;
+        if (Double.toString(artifact.getWeight()).contains(query)) score += 4;
         if (artifact.getTags() != null && artifact.getTags().stream().anyMatch(tag -> tag.toLowerCase().contains(query))) {
-            score += 2;
+            score += 3;
         }
+        if (artifact.getImagePath() != null && artifact.getImagePath().toLowerCase().contains(query)) score += 2;
 
         return score;
     }
