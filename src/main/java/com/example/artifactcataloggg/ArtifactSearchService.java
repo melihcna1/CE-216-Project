@@ -15,7 +15,7 @@ public class ArtifactSearchService {
     // Searches artifacts based on various fields with ranking priority
     public List<Artifact> searchArtifacts(String query) {
         if (query == null || query.trim().isEmpty()) {
-            return new ArrayList<>(); // Return empty if query is invalid
+            return new ArrayList<>(artifacts);
         }
 
         String lowerQuery = query.toLowerCase();

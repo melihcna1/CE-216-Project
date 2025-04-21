@@ -89,5 +89,23 @@
       "Ancient",
       "Gold"
     ]
+  },
+  {
+    "artifactID": "8847afcc-fb0e-4698-8d18-a2413cee333f",
+    "artifactName": "asdasd",
+    "category": "asdaa",
+    "civilization": "asdasd",
+    "discoveryLocation": "adasd",
+    "composition": "asdad",
+    "discoveryDate": "12.12.2022",
+    "currentPlace": "aasdja",
+    "width": 12.0,
+    "length": 12.0,
+    "height": 12.0,
+    "weight": 12.0,
+    "tags": [
+      "altın"
+    ],
+    "imagePath": "C:\\Users\\melih\\Pictures\\Cyberpunk 2077\\photomode_20102023_132725.png"
   }
 ]
