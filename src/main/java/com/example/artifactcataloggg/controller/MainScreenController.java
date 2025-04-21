@@ -2,6 +2,7 @@ package com.example.artifactcataloggg.controller;
 
 import com.example.artifactcataloggg.Artifact;
 import com.example.artifactcataloggg.ArtifactRepository;
+import com.example.artifactcataloggg.ArtifactSearchService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import javafx.collections.FXCollections;
@@ -59,11 +60,10 @@ public class MainScreenController implements Initializable {
         displayArtifacts(allArtifacts);
         refreshTags(); // Tüm tag'leri göster
 
+        ArtifactSearchService searchService = new ArtifactSearchService(allArtifacts);
         searchButton.setOnAction(event -> {
-            String query = searchField.getText().toLowerCase();
-            List<Artifact> filtered = allArtifacts.stream()
-                    .filter(a -> a.getArtifactName().toLowerCase().contains(query))
-                    .toList();
+            String query = searchField.getText();
+            List<Artifact> filtered = searchService.searchArtifacts(query);
             displayArtifacts(filtered);
         });
 
