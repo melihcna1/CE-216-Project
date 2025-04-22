@@ -33,7 +33,8 @@
     "weight": 10.0,
     "tags": [
       "Ancient",
-      "Gold"
+      "Gold",
+      "arda"
     ]
   },
   {
@@ -106,7 +107,7 @@
     "height": 12.0,
     "weight": 12.0,
     "tags": [
-      "altın"
+      "alper"
     ],
     "imagePath": "C:\\Users\\melih\\Pictures\\Cyberpunk 2077\\photomode_20102023_132725.png"
   }

@@ -214,10 +214,12 @@ public class MainScreenController implements Initializable {
                     EditScreenController controller = loader.getController();
                     controller.setEditMode(true, artifact);
                     controller.setOnArtifactSaved(() -> {
-                        artifactRepository.reloadArtifactsFromFile();  // JSON'dan güncel listeyi yükle
+                        artifactRepository.reloadArtifactsFromFile();
                         allArtifacts = artifactRepository.getArtifacts();
                         displayArtifacts(allArtifacts);
+                        refreshTags();
                     });
+
 
 
                     Stage stage = new Stage();
@@ -260,11 +262,13 @@ public class MainScreenController implements Initializable {
             EditScreenController controller = loader.getController();
             controller.setEditMode(true, selectedArtifact);
             controller.setOnArtifactSaved(() -> {
-                artifactRepository.reloadArtifactsFromFile();
+                artifactRepository.reloadArtifactsFromFile();  // JSON'dan güncel listeyi yükle
                 allArtifacts = artifactRepository.getArtifacts();
                 displayArtifacts(allArtifacts);
                 refreshTags();
             });
+
+
 
 
 
@@ -288,11 +292,13 @@ public class MainScreenController implements Initializable {
             EditScreenController controller = loader.getController();
             controller.setEditMode(false, null); // Yeni artifact ekleme modu
             controller.setOnArtifactSaved(() -> {
-                artifactRepository.reloadArtifactsFromFile();
+                artifactRepository.reloadArtifactsFromFile();  // JSON'dan güncel listeyi yükle
                 allArtifacts = artifactRepository.getArtifacts();
                 displayArtifacts(allArtifacts);
                 refreshTags();
             });
+
+
 
 
 
