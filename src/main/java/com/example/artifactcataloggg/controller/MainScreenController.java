@@ -19,6 +19,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -351,7 +352,21 @@ public class MainScreenController implements Initializable {
 
         tagListView.setItems(FXCollections.observableArrayList(allTags));
     }
+    @FXML
+    private void handleAboutMenu() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/UserManual.fxml"));
+            Parent root = loader.load();
 
+            Stage stage = new Stage();
+            stage.setTitle("User Manual");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 
