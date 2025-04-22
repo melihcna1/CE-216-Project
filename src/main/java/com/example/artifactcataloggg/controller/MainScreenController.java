@@ -41,7 +41,9 @@ public class MainScreenController implements Initializable {
 
     @FXML
     private ListView<String> tagListView;
+    @FXML
     private ArtifactRepository repository;
+    @FXML
     private List<Artifact> allArtifacts = new ArrayList<>();
     @FXML
     private Button editButton;
@@ -204,8 +206,6 @@ public class MainScreenController implements Initializable {
             highlightSelectedCard(box);
 
 
-
-
             if (event.getClickCount() == 2) {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
@@ -215,12 +215,11 @@ public class MainScreenController implements Initializable {
                     controller.setEditMode(true, artifact);
                     controller.setOnArtifactSaved(() -> {
                         artifactRepository.reloadArtifactsFromFile();
+                        artifactRepository.reloadArtifactsFromFile();
                         allArtifacts = artifactRepository.getArtifacts();
                         displayArtifacts(allArtifacts);
                         refreshTags();
                     });
-
-
 
                     Stage stage = new Stage();
                     stage.setTitle("Edit Artifact");
@@ -319,13 +318,19 @@ public class MainScreenController implements Initializable {
             return;
         }
 
-        allArtifacts.remove(selectedArtifact);
-        displayArtifacts(allArtifacts);
         artifactRepository.deleteArtifact(selectedArtifact.getArtifactID());
+        artifactRepository.reloadArtifactsFromFile();
+        allArtifacts = artifactRepository.getArtifacts();
+        displayArtifacts(allArtifacts);
+        refreshTags();
 
         System.out.println("Artifact silindi: " + selectedArtifact.getArtifactID());
         selectedArtifact = null;
     }
+
+
+
+
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Hata");

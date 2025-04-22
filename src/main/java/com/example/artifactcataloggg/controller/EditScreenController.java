@@ -60,6 +60,8 @@ public class EditScreenController {
 
     @FXML
     private void onSaveClick(ActionEvent event) {
+        ArtifactRepository.getInstance().reloadArtifactsFromFile();
+
         if (isEditMode && artifact != null) {
             updateArtifactFromFields(artifact);
             ArtifactRepository.getInstance().updateArtifact(artifact);
@@ -73,7 +75,6 @@ public class EditScreenController {
         if (onArtifactSaved != null) {
             onArtifactSaved.run();
         }
-
         closeWindow(event);
     }
 
