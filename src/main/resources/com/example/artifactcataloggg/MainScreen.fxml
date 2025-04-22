@@ -11,6 +11,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
@@ -60,9 +61,7 @@
         <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
             <children>
                 <Label text="Tags:" />
-                <ListView fx:id="tagListView" prefHeight="100.0" />
-                <Label text="Artifacts:" />
-                <ListView fx:id="artifactListView" prefHeight="268.0" prefWidth="100.0" />
+                <ListView fx:id="tagListView" prefHeight="200.0" />
             </children>
         </VBox>
     </right>

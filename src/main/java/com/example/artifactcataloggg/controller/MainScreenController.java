@@ -44,11 +44,6 @@ public class MainScreenController implements Initializable {
     private ArtifactRepository repository;
     private List<Artifact> allArtifacts = new ArrayList<>();
     @FXML
-    private TableView<Artifact> artifactTable;
-
-    @FXML
-    private ListView<Artifact> artifactListView;
-    @FXML
     private Button editButton;
 
     private ObservableList<Artifact> artifactData = FXCollections.observableArrayList();
@@ -265,10 +260,13 @@ public class MainScreenController implements Initializable {
             EditScreenController controller = loader.getController();
             controller.setEditMode(true, selectedArtifact);
             controller.setOnArtifactSaved(() -> {
-                artifactRepository.reloadArtifactsFromFile();  // JSON'dan güncel listeyi yükle
+                artifactRepository.reloadArtifactsFromFile();
                 allArtifacts = artifactRepository.getArtifacts();
                 displayArtifacts(allArtifacts);
+                refreshTags();
             });
+
+
 
 
 
@@ -290,10 +288,12 @@ public class MainScreenController implements Initializable {
             EditScreenController controller = loader.getController();
             controller.setEditMode(false, null); // Yeni artifact ekleme modu
             controller.setOnArtifactSaved(() -> {
-                artifactRepository.reloadArtifactsFromFile();  // JSON'dan güncel listeyi yükle
+                artifactRepository.reloadArtifactsFromFile();
                 allArtifacts = artifactRepository.getArtifacts();
                 displayArtifacts(allArtifacts);
+                refreshTags();
             });
+
 
 
             Stage stage = new Stage();
