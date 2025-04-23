@@ -1,97 +1,237 @@
 [
   {
-    "artifactID": "A1",
-    "artifactName": "Ancient Vase",
-    "category": "Pottery",
-    "civilization": "Greek",
-    "discoveryLocation": "Athens",
-    "composition": "Clay",
-    "discoveryDate": "500 BC",
+    "artifactID": "A001",
+    "artifactName": "Venus de Milo",
+    "category": "Sculpture",
+    "civilization": "Ancient Greece",
+    "discoveryLocation": "Milos Island",
+    "composition": "Marble",
+    "discoveryDate": "1820",
     "currentPlace": "Louvre Museum",
-    "width": 10.5,
-    "length": 10.5,
-    "height": 20.0,
-    "weight": 2.5,
+    "width": 60.0,
+    "length": 60.0,
+    "height": 203.0,
+    "weight": 900.0,
     "tags": [
-      "antique",
-      "museum",
-      "greek"
-    ]
-  },
-  {
-    "artifactID": "A005",
-    "artifactName": "Ancient Sword",
-    "category": "Metal",
-    "civilization": "Ancient",
-    "discoveryLocation": "Rome",
-    "composition": "Gold",
-    "discoveryDate": "200 BC",
-    "currentPlace": "Museum",
-    "width": 10.0,
-    "length": 10.0,
-    "height": 10.0,
-    "weight": 10.0,
-    "tags": [
-      "Ancient",
-      "Gold",
-      "arda"
-    ]
-  },
-  {
-    "artifactID": "Unknown",
-    "artifactName": "Old Coins",
-    "category": "Unknown",
-    "civilization": "Unknown",
-    "discoveryLocation": "Unknown",
-    "composition": "Unknown",
-    "discoveryDate": "Unknown",
-    "currentPlace": "Unknown",
-    "width": 0.0,
-    "length": 0.0,
-    "height": 0.0,
-    "weight": 0.0,
-    "tags": [
-      "blim",
-      "melihtag"
+      "Greece",
+      "Sculpture",
+      "Marble"
     ],
-    "imagePath": "artifactImages/coin.jpg"
+    "imagePath": "artifactImages/Venus.jpg"
+  },
+  {
+    "artifactID": "A002",
+    "artifactName": "Winged Victory of Samothrace",
+    "category": "Sculpture" ,
+    "civilization": "Hellenistic",
+    "discoveryLocation": "Samothrace",
+    "composition": "Marble",
+    "discoveryDate": "1863",
+    "currentPlace": "Louvre Museum",
+    "width": 70.0,
+    "length": 90.0,
+    "height": 245.0,
+    "weight": 1200.0,
+    "tags": [
+      "Hellenistic",
+      "Marble"
+    ],
+    "imagePath": "artifactImages/Samothrace.jpg"
   },
   {
     "artifactID": "A003",
-    "artifactName": "Ancient Vase",
-    "category": "Ceramic",
-    "civilization": "Greek",
-    "discoveryLocation": "Athens",
-    "composition": "Clay",
-    "discoveryDate": "500 BC",
-    "currentPlace": "British Museum",
-    "width": 30.0,
-    "length": 30.0,
-    "height": 30.0,
-    "weight": 30.0,
+    "artifactName": "Code of Hammurabi",
+    "category": "Inscription",
+    "civilization": "Babylonian",
+    "discoveryLocation": "Susa",
+    "composition": "Diorite",
+    "discoveryDate": "1901",
+    "currentPlace": "Louvre Museum",
+    "width": 60.0,
+    "length": 60.0,
+    "height": 225.0,
+    "weight": 1500.0,
     "tags": [
-      "Antique",
-      "Greek",
-      "Handmade"
+      "Law",
+      "Babylon",
+      "Stone"
     ],
-    "imagePath": "C:\\Users\\Gedik\\Desktop\\indir.jpeg"
+    "imagePath": "artifactImages/Hammurabi.jpeg"
   },
   {
     "artifactID": "A004",
-    "artifactName": "Ancient Sword",
-    "category": "Metal",
-    "civilization": "Ancient",
+    "artifactName": "Egyptian Sarcophagus",
+    "category": "Funerary",
+    "civilization": "Ancient Egypt",
+    "discoveryLocation": "Thebes",
+    "composition": "Wood and Paint",
+    "discoveryDate": "1850",
+    "currentPlace": "Louvre Museum",
+    "width": 80.0,
+    "length": 240.0,
+    "height": 80.0,
+    "weight": 300.0,
+    "tags": [
+      "Egypt",
+      "Sarcophagus",
+      "Painted"
+    ],
+    "imagePath": "artifactImages/Sarcophagus.jpg"
+  },
+  {
+    "artifactID": "B001",
+    "artifactName": "Laocoön and His Sons",
+    "category": "Sculpture",
+    "civilization": "Hellenistic",
     "discoveryLocation": "Rome",
-    "composition": "Gold",
-    "discoveryDate": "200 BC",
-    "currentPlace": "Museum",
+    "composition": "Marble",
+    "discoveryDate": "1506",
+    "currentPlace": "Vatican Museums",
+    "width": 80.0,
+    "length": 100.0,
+    "height": 200.0,
+    "weight": 950.0,
+    "tags": [
+      "Hellenistic",
+      "Mythology",
+      "Marble"
+    ],
+    "imagePath": "artifactImages/Laocoön.jpg"
+  },
+  {
+    "artifactID": "B002",
+    "artifactName":"Raphael Tapestry",
+    "category": "Textile",
+    "civilization": "Renaissance",
+    "discoveryLocation": "Brussels",
+    "composition": "Wool and Silk",
+    "discoveryDate": "1519",
+    "currentPlace": "Vatican Museums",
+    "width": 300.0,
+    "length": 500.0,
+    "height": 0.5,
+    "weight": 50.0,
+    "tags": [
+      "Tapestry",
+      "Raphael",
+      "Renaissance"
+    ],
+    "imagePath": "artifactImages/Raphael.jpg"
+  },
+  {
+    "artifactID": "B003",
+    "artifactName":"Egyptian Cat Statue",
+    "category": "Statue",
+    "civilization": "Ancient Egypt",
+    "discoveryLocation": "Memphis",
+    "composition": "Bronze",
+    "discoveryDate": "1890",
+    "currentPlace": "Vatican Museums",
+    "width": 20.0,
+    "length": 250.0,
+    "height": 40.0,
+    "weight": 5.0,
+    "tags": [
+      "Cat",
+      "Egypt",
+      "Bronze"
+    ],
+    "imagePath": "artifactImages/Cat.jpeg"
+  },
+  {
+    "artifactID": "B004",
+    "artifactName":"Roman Bust of Caesar",
+    "category": "Sculpture",
+    "civilization": "Roman",
+    "discoveryLocation": "Rome",
+    "composition": "Marble",
+    "discoveryDate": "1789",
+    "currentPlace": "Vatican Museums",
+    "width": 30.0,
+    "length": 30.0,
+    "height": 50.0,
+    "weight": 45.0,
+    "tags": [
+      "Caesar",
+      "Rome",
+      "Bust"
+    ],
+    "imagePath": "artifactImages/Ceasar.jpeg"
+  },
+  {
+    "artifactID": "C001",
+    "artifactName":"Terracotta Warrior",
+    "category": "Statue",
+    "civilization": "Qin Dynasty",
+    "discoveryLocation": "Xi'an",
+    "composition": "Terracotta",
+    "discoveryDate": "1974",
+    "currentPlace": "National Museum of China",
+    "width": 60.0,
+    "length": 60.0,
+    "height": 180.0,
+    "weight": 300.0,
+    "tags": [
+      "Warrior"
+    ],
+    "imagePath": "artifactImages/Terrocota.jpg"
+  },
+  {
+    "artifactID": "C002",
+    "artifactName":"Jade Dragon Pendant",
+    "category": "Jewelry",
+    "civilization": "Hongshan Culture",
+    "discoveryLocation": "Inner Mongolia",
+    "composition": "Jade",
+    "discoveryDate": "1982",
+    "currentPlace": "National Museum of China",
     "width": 10.0,
-    "length": 10.0,
-    "height": 10.0,
+    "length": 20.0,
+    "height": 1.0,
+    "weight": 0.2,
+    "tags": [
+      "Jewelry",
+      "Dragon"
+    ],
+    "imagePath": "artifactImages/Jade.jpeg"
+  },
+  {
+    "artifactID": "c003",
+    "artifactName":"Ancient Bell",
+    "category": "Instrument",
+    "civilization": "Zhou Dynasty",
+    "discoveryLocation": "Henan",
+    "composition": "Bronze",
+    "discoveryDate": "1953",
+    "currentPlace": "National Museum of China",
+    "width": 40.0,
+    "length": 40.0,
+    "height": 60.0,
+    "weight": 70.0,
+    "tags": [
+      "Bell",
+      "Bronze"
+    ],
+    "imagePath": "artifactImages/Bell.jpg"
+  },
+  {
+    "artifactID": "C004",
+    "artifactName":"Painted Pottery Jar",
+    "category": "Ceramics",
+    "civilization": "Neolithic",
+    "discoveryLocation": "Yangshao",
+    "composition": "Clay",
+    "discoveryDate": "1921",
+    "currentPlace": "National Museum of China",
+    "width": 30.0,
+    "length": 30.0,
+    "height": 50.0,
     "weight": 10.0,
     "tags": [
-      "Ancient",
-      "Gold"
-    ]
+      "Pottery",
+      "Neolithic",
+      "Painted"
+    ],
+    "imagePath": "artifactImages/Jar.jpg"
   }
 ]
