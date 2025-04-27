@@ -82,7 +82,9 @@
             <Button fx:id="filterByDateButton" text="Filter" />
             <Button fx:id="clearFiltersButton" text="Clear Filters" />
             <Label text="Artifact Image:"/>
-            <ImageView fx:id="artifactImageView" fitWidth="180.0" fitHeight="180.0" preserveRatio="true"/>
+            <HBox alignment="CENTER">
+                <ImageView fx:id="artifactImageView" fitWidth="180.0" fitHeight="180.0" preserveRatio="true"/>
+            </HBox>
         </VBox>
     </right>
 

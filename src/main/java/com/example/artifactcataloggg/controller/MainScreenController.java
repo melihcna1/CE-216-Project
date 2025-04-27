@@ -93,6 +93,13 @@ public class MainScreenController implements Initializable {
         displayArtifacts(allArtifacts);
         refreshTags(); // 🔥 artifacts yüklenince tag listesi de hemen dolacak!
         setupTableViewContextMenu(); // 🛠 Sağ tık menüyü aktif et
+        artifactImageView.setStyle(
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0.5, 0, 0);" +
+                        "-fx-border-color: black;" +
+                        "-fx-border-width: 2;" +
+                        "-fx-border-radius: 5;" +
+                        "-fx-background-radius: 5;"
+        );
 
         searchButton.setOnAction(event -> performSearch());
         searchField.setOnAction(event -> performSearch());  // ✨ Enter tuşuna basınca da aynı arama yapılacak
@@ -293,6 +300,7 @@ public class MainScreenController implements Initializable {
 
                 Stage stage = new Stage();
                 stage.setTitle("Edit Artifact");
+                stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/Museum.png")));
                 stage.setScene(new Scene(root));
                 stage.show();
             } catch (IOException ex) {
@@ -332,6 +340,7 @@ public class MainScreenController implements Initializable {
 
                     Stage stage = new Stage();
                     stage.setTitle("Edit Artifact");
+                    stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/Museum.png")));
                     stage.setScene(new Scene(root));
                     stage.show();
                 } catch (IOException e) {
@@ -355,6 +364,8 @@ public class MainScreenController implements Initializable {
 
         Stage stage = new Stage();
         stage.setTitle("Add New Artifact");
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/Museum.png")));
+
         stage.setScene(new Scene(root));
         stage.show();
     }
@@ -382,6 +393,7 @@ public class MainScreenController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle("Edit Artifact");
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/Museum.png")));
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
@@ -406,6 +418,7 @@ public class MainScreenController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle("Add New Artifact");
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/Museum.png")));
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
@@ -484,6 +497,7 @@ public class MainScreenController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle("User Manual");
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/HelpLogo.png"))); // 🔥 İKON EKLENDİ
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
@@ -491,7 +505,6 @@ public class MainScreenController implements Initializable {
             e.printStackTrace();
         }
     }
-
     private void filterArtifactsByDate() {
         if (startDatePicker.getValue() != null && endDatePicker.getValue() != null) {
             int startYear = startDatePicker.getValue().getYear();
@@ -552,6 +565,7 @@ public class MainScreenController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle("Edit Artifact");
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/Museum.png")));
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
