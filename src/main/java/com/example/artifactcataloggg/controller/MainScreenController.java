@@ -3,6 +3,9 @@ package com.example.artifactcataloggg.controller;
 import com.example.artifactcataloggg.Artifact;
 import com.example.artifactcataloggg.ArtifactRepository;
 import com.example.artifactcataloggg.ArtifactSearchService;
+import javafx.scene.input.MouseButton;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import javafx.collections.FXCollections;
@@ -89,6 +92,7 @@ public class MainScreenController implements Initializable {
         setupTableColumns();
         displayArtifacts(allArtifacts);
         refreshTags(); // 🔥 artifacts yüklenince tag listesi de hemen dolacak!
+        setupTableViewContextMenu(); // 🛠 Sağ tık menüyü aktif et
 
         searchButton.setOnAction(event -> performSearch());
         searchField.setOnAction(event -> performSearch());  // ✨ Enter tuşuna basınca da aynı arama yapılacak
@@ -222,7 +226,7 @@ public class MainScreenController implements Initializable {
 
 
     private VBox createArtifactCard(Artifact artifact) {
-            VBox box = new VBox();
+        VBox box = new VBox();
         box.setSpacing(8);
         box.setPadding(new Insets(12));
         box.setStyle(
@@ -234,9 +238,8 @@ public class MainScreenController implements Initializable {
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0.5, 0, 2);"
         );
 
-
         Label nameLabel = new Label(artifact.getArtifactName());
-            nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
 
         ImageView imageView = new ImageView();
         String imagePath = artifact.getImagePath();
@@ -246,23 +249,18 @@ public class MainScreenController implements Initializable {
             File file = new File(imagePath);
 
             if (file.exists()) {
-                // Dosya sisteminden gelen görsel (dış dosya)
                 img = new Image(file.toURI().toString(), 100, 100, true, true);
             } else {
-                // Proje içinden (resources klasörü) yüklemeye çalış
                 InputStream imageStream = getClass().getResourceAsStream("/" + imagePath);
                 if (imageStream != null) {
                     img = new Image(imageStream, 100, 100, true, true);
                 } else {
-                    System.out.println("Görsel bulunamadı, placeholder kullanılacak: " + imagePath);
                     InputStream placeholderStream = getClass().getResourceAsStream("/artifactImages/placeholder.png");
                     img = new Image(placeholderStream, 100, 100, true, true);
                 }
             }
-
             imageView.setImage(img);
         } else {
-            // Görsel yolu boşsa placeholder göster
             InputStream placeholderStream = getClass().getResourceAsStream("/artifactImages/placeholder.png");
             imageView.setImage(new Image(placeholderStream, 100, 100, true, true));
         }
@@ -270,15 +268,55 @@ public class MainScreenController implements Initializable {
         imageView.setFitWidth(100);
         imageView.setFitHeight(100);
 
-
         box.getChildren().addAll(imageView, nameLabel);
-        box.setOnMouseClicked(event -> {
 
+        // 🆕 Sağ tıklama için ContextMenu oluşturuyoruz
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem editItem = new MenuItem("Edit");
+        MenuItem deleteItem = new MenuItem("Delete");
+        contextMenu.getItems().addAll(editItem, deleteItem);
+
+        // Edit seçilince edit ekranı açılıyor
+        editItem.setOnAction(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
+                Parent root = loader.load();
+
+                EditScreenController controller = loader.getController();
+                controller.setEditMode(true, artifact);
+                controller.setOnArtifactSaved(() -> {
+                    artifactRepository.reloadArtifactsFromFile();
+                    allArtifacts = artifactRepository.getArtifacts();
+                    displayArtifacts(allArtifacts);
+                    refreshTags();
+                });
+
+                Stage stage = new Stage();
+                stage.setTitle("Edit Artifact");
+                stage.setScene(new Scene(root));
+                stage.show();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        // Delete seçilince artifact siliniyor
+        deleteItem.setOnAction(e -> {
+            artifactRepository.deleteArtifact(artifact.getArtifactID());
+            artifactRepository.reloadArtifactsFromFile();
+            allArtifacts = artifactRepository.getArtifacts();
+            displayArtifacts(allArtifacts);
+            refreshTags();
+            System.out.println("Artifact deleted via right-click menu: " + artifact.getArtifactID());
+        });
+
+        box.setOnMouseClicked(event -> {
             selectedArtifact = artifact;
             highlightSelectedCard(box);
 
-
-            if (event.getClickCount() == 2) {
+            if (event.getButton() == MouseButton.SECONDARY) { // SAĞ TIK mı diye bakıyoruz
+                contextMenu.show(box, event.getScreenX(), event.getScreenY());
+            } else if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY) { // SOL ÇİFT TIK
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
                     Parent root = loader.load();
@@ -286,7 +324,6 @@ public class MainScreenController implements Initializable {
                     EditScreenController controller = loader.getController();
                     controller.setEditMode(true, artifact);
                     controller.setOnArtifactSaved(() -> {
-                        artifactRepository.reloadArtifactsFromFile();
                         artifactRepository.reloadArtifactsFromFile();
                         allArtifacts = artifactRepository.getArtifacts();
                         displayArtifacts(allArtifacts);
@@ -300,11 +337,14 @@ public class MainScreenController implements Initializable {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            } else {
+                contextMenu.hide(); // Sol tıkta menüyü kapat
             }
         });
 
         return box;
-        }
+    }
+
     @FXML
     private void onAddButtonClick(ActionEvent event) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
@@ -377,19 +417,29 @@ public class MainScreenController implements Initializable {
     @FXML
     private void deleteArtifact() {
         if (selectedArtifact == null) {
-            showAlert("Silinecek artifact seçilmedi.");
+            showAlert("No artifact selected for deletion.");
             return;
         }
 
-        artifactRepository.deleteArtifact(selectedArtifact.getArtifactID());
-        artifactRepository.reloadArtifactsFromFile();
-        allArtifacts = artifactRepository.getArtifacts();
-        displayArtifacts(allArtifacts);
-        refreshTags();
+        // 🔥 Onay kutusu göster
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Delete Confirmation");
+        confirmation.setHeaderText(null);
+        confirmation.setContentText("Are you sure you want to delete the selected artifact?");
 
-        System.out.println("Artifact silindi: " + selectedArtifact.getArtifactID());
-        selectedArtifact = null;
+        confirmation.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                artifactRepository.deleteArtifact(selectedArtifact.getArtifactID());
+                artifactRepository.reloadArtifactsFromFile();
+                allArtifacts = artifactRepository.getArtifacts();
+                displayArtifacts(allArtifacts);
+                refreshTags();
+                selectedArtifact = null;
+                System.out.println("Artifact deleted successfully.");
+            }
+        });
     }
+
 
 
 
@@ -532,6 +582,57 @@ public class MainScreenController implements Initializable {
 
         displayArtifacts(filtered);
     }
+    private void setupTableViewContextMenu() {
+        artifactTableView.setRowFactory(tv -> {
+            TableRow<Artifact> row = new TableRow<>();
+            ContextMenu contextMenu = new ContextMenu();
+
+            MenuItem editItem = new MenuItem("Edit");
+            MenuItem deleteItem = new MenuItem("Delete");
+            contextMenu.getItems().addAll(editItem, deleteItem);
+
+            // Edit seçilirse
+            editItem.setOnAction(event -> {
+                Artifact selectedArtifact = row.getItem();
+                if (selectedArtifact != null) {
+                    openEditScreen(selectedArtifact);
+                }
+            });
+
+            // Delete seçilirse
+            deleteItem.setOnAction(event -> {
+                Artifact selectedArtifact = row.getItem();
+                if (selectedArtifact != null) {
+                    // 🔥 Önce onay kutusu göster
+                    Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+                    confirmation.setTitle("Delete Confirmation");
+                    confirmation.setHeaderText(null);
+                    confirmation.setContentText("Are you sure you want to delete this artifact?");
+
+                    confirmation.showAndWait().ifPresent(response -> {
+                        if (response == ButtonType.OK) {
+                            artifactRepository.deleteArtifact(selectedArtifact.getArtifactID());
+                            artifactRepository.reloadArtifactsFromFile();
+                            allArtifacts = artifactRepository.getArtifacts();
+                            displayArtifacts(allArtifacts);
+                            refreshTags();
+                        }
+                    });
+                }
+            });
+
+
+            // Sadece dolu satırlara menü ekle
+            row.contextMenuProperty().bind(
+                    javafx.beans.binding.Bindings.when(row.emptyProperty())
+                            .then((ContextMenu) null)
+                            .otherwise(contextMenu)
+            );
+
+            return row;
+        });
+    }
+
 
 
 
