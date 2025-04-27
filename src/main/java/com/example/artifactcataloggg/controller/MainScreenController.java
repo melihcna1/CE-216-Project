@@ -14,6 +14,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -51,31 +52,88 @@ public class MainScreenController implements Initializable {
     private ObservableList<Artifact> artifactData = FXCollections.observableArrayList();
     private ArtifactRepository artifactRepository = new ArtifactRepository();
     private Artifact selectedArtifact = null;
+    @FXML
+    private TableView<Artifact> artifactTableView;
+    @FXML
+    private TableColumn<Artifact, String> nameColumn;
+    @FXML
+    private TableColumn<Artifact, String> categoryColumn;
+    @FXML
+    private TableColumn<Artifact, String> civilizationColumn;
+    @FXML
+    private TableColumn<Artifact, String> discoveryLocationColumn;
+    @FXML
+    private TableColumn<Artifact, String> compositionColumn;
+    @FXML
+    private TableColumn<Artifact, String> discoveryDateColumn;
+    @FXML
+    private TableColumn<Artifact, String> currentPlaceColumn;
+    @FXML
+    private ImageView artifactImageView;
+    @FXML
+    private DatePicker startDatePicker;
+    @FXML
+    private DatePicker endDatePicker;
+    @FXML
+    private Button filterByDateButton;
+    @FXML
+    private Button clearFiltersButton;
+
+
+
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         loadArtifacts();
+        setupTableColumns();
         displayArtifacts(allArtifacts);
-        refreshTags(); // Tüm tag'leri göster
+        refreshTags(); // 🔥 artifacts yüklenince tag listesi de hemen dolacak!
 
-        ArtifactSearchService searchService = new ArtifactSearchService(allArtifacts);
-        searchButton.setOnAction(event -> {
-            String query = searchField.getText();
-            List<Artifact> filtered = searchService.searchArtifacts(query);
-            displayArtifacts(filtered);
-        });
+        searchButton.setOnAction(event -> performSearch());
+        searchField.setOnAction(event -> performSearch());  // ✨ Enter tuşuna basınca da aynı arama yapılacak
 
-        // ✅ Tag ListView tıklanınca filtreleme yap
-        tagListView.setOnMouseClicked(event -> {
-            String selectedTag = tagListView.getSelectionModel().getSelectedItem();
-            if (selectedTag != null) {
-                List<Artifact> filtered = allArtifacts.stream()
-                        .filter(a -> a.getTags() != null && a.getTags().contains(selectedTag))
-                        .toList();
-                displayArtifacts(filtered);
+
+        artifactTableView.setOnMouseClicked(event -> {
+            Artifact selected = artifactTableView.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                selectedArtifact = selected;
+                showArtifactImage(selected);
+
+                if (event.getClickCount() == 2) { // ✨ ÇİFT TIK kontrolü
+                    openEditScreen(selected);
+                }
             }
         });
+
+        filterByDateButton.setOnAction(event -> {
+            filterArtifactsByDate();
+        });
+        clearFiltersButton.setOnAction(event -> {
+            clearFilters();
+        });
+        tagListView.getSelectionModel().selectedItemProperty().addListener((obs, oldTag, newTag) -> {
+            if (newTag != null) {
+                filterArtifactsByTag(newTag);
+            }
+        });
+
+
+
+
     }
+
+    private void setupTableColumns() {
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("artifactName"));
+        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
+        civilizationColumn.setCellValueFactory(new PropertyValueFactory<>("civilization"));
+        discoveryLocationColumn.setCellValueFactory(new PropertyValueFactory<>("discoveryLocation"));
+        compositionColumn.setCellValueFactory(new PropertyValueFactory<>("composition"));
+        discoveryDateColumn.setCellValueFactory(new PropertyValueFactory<>("discoveryDate"));
+        currentPlaceColumn.setCellValueFactory(new PropertyValueFactory<>("currentPlace"));
+    }
+
+
 
     public MainScreenController() {
         this.repository = new ArtifactRepository();
@@ -85,27 +143,33 @@ public class MainScreenController implements Initializable {
         allArtifacts.clear();
         allArtifacts.addAll(artifactRepository.getArtifacts()); // JSON'dan oku
     }
+    private void showArtifactImage(Artifact artifact) {
+        if (artifact.getImagePath() != null && !artifact.getImagePath().isEmpty()) {
+            try {
+                InputStream imageStream = getClass().getResourceAsStream("/" + artifact.getImagePath());
+                if (imageStream != null) {
+                    artifactImageView.setImage(new Image(imageStream));
+                } else {
+                    System.out.println("Image not found: " + artifact.getImagePath());
+                    artifactImageView.setImage(null); // Resim bulunamazsa boş bırak
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                artifactImageView.setImage(null);
+            }
+        } else {
+            artifactImageView.setImage(null);
+        }
+    }
+
+
+
 
 
     private void displayArtifacts(List<Artifact> artifacts) {
-        artifactGrid.getChildren().clear();
-        artifactGrid.setHgap(10);
-        artifactGrid.setVgap(10);
-
-        int column = 0;
-        int row = 0;
-
-        for (Artifact artifact : artifacts) {
-            VBox card = createArtifactCard(artifact);
-            artifactGrid.add(card, column, row);
-
-            column++;
-            if (column == 3) {
-                column = 0;
-                row++;
-            }
-        }
+        artifactTableView.getItems().setAll(artifacts);
     }
+
     @FXML
     public void exportToJson(ActionEvent event) {
         javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
@@ -159,11 +223,19 @@ public class MainScreenController implements Initializable {
 
     private VBox createArtifactCard(Artifact artifact) {
             VBox box = new VBox();
-            box.setSpacing(5);
-            box.setPadding(new Insets(10));
-            box.setStyle("-fx-border-color: rgb(128,128,128); -fx-border-radius: 5; -fx-background-color: #f4f4f4;");
+        box.setSpacing(8);
+        box.setPadding(new Insets(12));
+        box.setStyle(
+                "-fx-background-color: white;" +
+                        "-fx-background-radius: 12;" +
+                        "-fx-border-radius: 12;" +
+                        "-fx-border-color: #d0d0d0;" +
+                        "-fx-border-width: 1;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0.5, 0, 2);"
+        );
 
-            Label nameLabel = new Label(artifact.getArtifactName());
+
+        Label nameLabel = new Label(artifact.getArtifactName());
             nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
 
         ImageView imageView = new ImageView();
@@ -268,11 +340,6 @@ public class MainScreenController implements Initializable {
             });
 
 
-
-
-
-
-
             Stage stage = new Stage();
             stage.setTitle("Edit Artifact");
             stage.setScene(new Scene(root));
@@ -296,10 +363,6 @@ public class MainScreenController implements Initializable {
                 displayArtifacts(allArtifacts);
                 refreshTags();
             });
-
-
-
-
 
             Stage stage = new Stage();
             stage.setTitle("Add New Artifact");
@@ -378,6 +441,104 @@ public class MainScreenController implements Initializable {
             e.printStackTrace();
         }
     }
+
+    private void filterArtifactsByDate() {
+        if (startDatePicker.getValue() != null && endDatePicker.getValue() != null) {
+            int startYear = startDatePicker.getValue().getYear();
+            int endYear = endDatePicker.getValue().getYear();
+
+            List<Artifact> filtered = allArtifacts.stream()
+                    .filter(a -> {
+                        try {
+                            String discoveryDate = a.getDiscoveryDate();
+                            if (discoveryDate != null && discoveryDate.matches("\\d{2}-\\d{2}-\\d{4}")) {
+                                String[] parts = discoveryDate.split("-");
+                                int year = Integer.parseInt(parts[2]); // yıl kısmını alıyoruz
+                                return year >= startYear && year <= endYear;
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        return false;
+                    })
+                    .toList();
+
+            displayArtifacts(filtered);
+        } else {
+            showAlert("Please select both start and end dates for filtering.");
+        }
+    }
+    private void clearFilters() {
+        // DatePicker alanlarını temizle
+        startDatePicker.setValue(null);
+        endDatePicker.setValue(null);
+
+        // Tags seçimlerini temizle
+        tagListView.getSelectionModel().clearSelection();
+
+        // Artifact listesini yeniden yükle
+        displayArtifacts(allArtifacts);
+    }
+    private void filterArtifactsByTag(String selectedTag) {
+        List<Artifact> filtered = allArtifacts.stream()
+                .filter(a -> a.getTags() != null && a.getTags().contains(selectedTag))
+                .toList();
+
+        displayArtifacts(filtered);
+    }
+    private void openEditScreen(Artifact artifact) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
+            Parent root = loader.load();
+
+            EditScreenController controller = loader.getController();
+            controller.setEditMode(true, artifact);
+            controller.setOnArtifactSaved(() -> {
+                artifactRepository.reloadArtifactsFromFile();
+                allArtifacts = artifactRepository.getArtifacts();
+                displayArtifacts(allArtifacts);
+                refreshTags();
+            });
+
+            Stage stage = new Stage();
+            stage.setTitle("Edit Artifact");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void performSearch() {
+        String query = searchField.getText().toLowerCase();
+
+        if (query.isEmpty()) {
+            displayArtifacts(allArtifacts);
+            return;
+        }
+
+        List<Artifact> filtered = allArtifacts.stream()
+                .filter(a -> {
+                    if (a.getArtifactName() != null && a.getArtifactName().toLowerCase().contains(query)) return true;
+                    if (a.getCategory() != null && a.getCategory().toLowerCase().contains(query)) return true;
+                    if (a.getCivilization() != null && a.getCivilization().toLowerCase().contains(query)) return true;
+                    if (a.getDiscoveryLocation() != null && a.getDiscoveryLocation().toLowerCase().contains(query)) return true;
+                    if (a.getComposition() != null && a.getComposition().toLowerCase().contains(query)) return true;
+                    if (a.getDiscoveryDate() != null && a.getDiscoveryDate().toLowerCase().contains(query)) return true;
+                    if (a.getCurrentPlace() != null && a.getCurrentPlace().toLowerCase().contains(query)) return true;
+                    if (a.getTags() != null && a.getTags().stream().anyMatch(tag -> tag.toLowerCase().contains(query))) return true;
+                    return false;
+                })
+                .toList();
+
+        displayArtifacts(filtered);
+    }
+
+
+
+
+
+
+
 
 
 
