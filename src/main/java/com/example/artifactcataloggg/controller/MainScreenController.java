@@ -573,29 +573,42 @@ public class MainScreenController implements Initializable {
         }
     }
     private void performSearch() {
-        String query = searchField.getText().toLowerCase();
+        String input = searchField.getText().toLowerCase().trim();
 
-        if (query.isEmpty()) {
+        if (input.isEmpty()) {
             displayArtifacts(allArtifacts);
             return;
         }
 
+        String[] keywords = input.split(",");
+
         List<Artifact> filtered = allArtifacts.stream()
                 .filter(a -> {
-                    if (a.getArtifactName() != null && a.getArtifactName().toLowerCase().contains(query)) return true;
-                    if (a.getCategory() != null && a.getCategory().toLowerCase().contains(query)) return true;
-                    if (a.getCivilization() != null && a.getCivilization().toLowerCase().contains(query)) return true;
-                    if (a.getDiscoveryLocation() != null && a.getDiscoveryLocation().toLowerCase().contains(query)) return true;
-                    if (a.getComposition() != null && a.getComposition().toLowerCase().contains(query)) return true;
-                    if (a.getDiscoveryDate() != null && a.getDiscoveryDate().toLowerCase().contains(query)) return true;
-                    if (a.getCurrentPlace() != null && a.getCurrentPlace().toLowerCase().contains(query)) return true;
-                    if (a.getTags() != null && a.getTags().stream().anyMatch(tag -> tag.toLowerCase().contains(query))) return true;
-                    return false;
+                    for (String keyword : keywords) {
+                        String k = keyword.trim();
+                        if (k.isEmpty()) continue;
+
+                        boolean matches = false;
+
+                        if ((a.getArtifactName() != null && a.getArtifactName().toLowerCase().contains(k)) ||
+                                (a.getCategory() != null && a.getCategory().toLowerCase().contains(k)) ||
+                                (a.getCivilization() != null && a.getCivilization().toLowerCase().contains(k)) ||
+                                (a.getDiscoveryLocation() != null && a.getDiscoveryLocation().toLowerCase().contains(k)) ||
+                                (a.getComposition() != null && a.getComposition().toLowerCase().contains(k)) ||
+                                (a.getDiscoveryDate() != null && a.getDiscoveryDate().toLowerCase().contains(k)) ||
+                                (a.getCurrentPlace() != null && a.getCurrentPlace().toLowerCase().contains(k)) ||
+                                (a.getTags() != null && a.getTags().stream().anyMatch(tag -> tag.toLowerCase().contains(k)))) {
+                            matches = true;
+                        }
+
+                        if (!matches) return false; // AND mantığı: biri bile eşleşmezse elenir
+                    }
+                    return true; // tüm anahtar kelimeler eşleştiyse kalır
                 })
                 .toList();
 
         displayArtifacts(filtered);
-    }
+}
     private void setupTableViewContextMenu() {
         artifactTableView.setRowFactory(tv -> {
             TableRow<Artifact> row = new TableRow<>();
