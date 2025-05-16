@@ -1,8 +1,7 @@
 package com.example.artifactcataloggg.controller;
 
-import com.example.artifactcataloggg.Artifact;
-import com.example.artifactcataloggg.ArtifactRepository;
-import com.example.artifactcataloggg.ArtifactSearchService;
+import com.example.artifactcataloggg.model.Artifact;
+import com.example.artifactcataloggg.service.ArtifactService;
 import javafx.scene.input.MouseButton;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -23,6 +22,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -31,8 +31,15 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class MainScreenController implements Initializable {
+
+    private static final Logger LOGGER = Logger.getLogger(MainScreenController.class.getName());
 
     @FXML
     private TextField searchField;
@@ -46,14 +53,14 @@ public class MainScreenController implements Initializable {
     @FXML
     private ListView<String> tagListView;
     @FXML
-    private ArtifactRepository repository;
-    @FXML
     private List<Artifact> allArtifacts = new ArrayList<>();
     @FXML
     private Button editButton;
+    @FXML
+    private Button applyTagFilterButton;
 
     private ObservableList<Artifact> artifactData = FXCollections.observableArrayList();
-    private ArtifactRepository artifactRepository = new ArtifactRepository();
+    private final ArtifactService artifactService = ArtifactService.getInstance();
     private Artifact selectedArtifact = null;
     @FXML
     private TableView<Artifact> artifactTableView;
@@ -82,17 +89,16 @@ public class MainScreenController implements Initializable {
     @FXML
     private Button clearFiltersButton;
 
-
-
-
+    private List<String> selectedTags = new ArrayList<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         loadArtifacts();
         setupTableColumns();
         displayArtifacts(allArtifacts);
-        refreshTags(); // 🔥 artifacts yüklenince tag listesi de hemen dolacak!
-        setupTableViewContextMenu(); // 🛠 Sağ tık menüyü aktif et
+        setupTagListView();
+        refreshTags();
+        setupTableViewContextMenu();
         artifactImageView.setStyle(
                 "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0.5, 0, 0);" +
                         "-fx-border-color: black;" +
@@ -102,8 +108,7 @@ public class MainScreenController implements Initializable {
         );
 
         searchButton.setOnAction(event -> performSearch());
-        searchField.setOnAction(event -> performSearch());  // ✨ Enter tuşuna basınca da aynı arama yapılacak
-
+        searchField.setOnAction(event -> performSearch());
 
         artifactTableView.setOnMouseClicked(event -> {
             Artifact selected = artifactTableView.getSelectionModel().getSelectedItem();
@@ -111,7 +116,7 @@ public class MainScreenController implements Initializable {
                 selectedArtifact = selected;
                 showArtifactImage(selected);
 
-                if (event.getClickCount() == 2) { // ✨ ÇİFT TIK kontrolü
+                if (event.getClickCount() == 2) {
                     openEditScreen(selected);
                 }
             }
@@ -123,15 +128,10 @@ public class MainScreenController implements Initializable {
         clearFiltersButton.setOnAction(event -> {
             clearFilters();
         });
-        tagListView.getSelectionModel().selectedItemProperty().addListener((obs, oldTag, newTag) -> {
-            if (newTag != null) {
-                filterArtifactsByTag(newTag);
-            }
-        });
-
-
-
-
+        
+        if (applyTagFilterButton != null) {
+            applyTagFilterButton.setOnAction(event -> applyTagFilters());
+        }
     }
 
     private void setupTableColumns() {
@@ -144,28 +144,31 @@ public class MainScreenController implements Initializable {
         currentPlaceColumn.setCellValueFactory(new PropertyValueFactory<>("currentPlace"));
     }
 
-
-
-    public MainScreenController() {
-        this.repository = new ArtifactRepository();
-    }
-
     private void loadArtifacts() {
         allArtifacts.clear();
-        allArtifacts.addAll(artifactRepository.getArtifacts()); // JSON'dan oku
+        allArtifacts.addAll(artifactService.getAllArtifacts());
     }
+
     private void showArtifactImage(Artifact artifact) {
         if (artifact.getImagePath() != null && !artifact.getImagePath().isEmpty()) {
             try {
-                InputStream imageStream = getClass().getResourceAsStream("/" + artifact.getImagePath());
-                if (imageStream != null) {
-                    artifactImageView.setImage(new Image(imageStream));
+                File imageFile = new File(artifact.getImagePath());
+                if (imageFile.exists()) {
+                    artifactImageView.setImage(new Image(imageFile.toURI().toString()));
                 } else {
-                    System.out.println("Image not found: " + artifact.getImagePath());
-                    artifactImageView.setImage(null); // Resim bulunamazsa boş bırak
+                    // Try to load from resources
+                    String resourcePath = artifact.getImagePath().startsWith("/") ? 
+                        artifact.getImagePath() : "/" + artifact.getImagePath();
+                    InputStream imageStream = getClass().getResourceAsStream(resourcePath);
+                    if (imageStream != null) {
+                        artifactImageView.setImage(new Image(imageStream));
+                    } else {
+                        LOGGER.warning("Image not found: " + artifact.getImagePath());
+                        artifactImageView.setImage(null);
+                    }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.log(Level.WARNING, "Error loading image", e);
                 artifactImageView.setImage(null);
             }
         } else {
@@ -173,64 +176,64 @@ public class MainScreenController implements Initializable {
         }
     }
 
-
-
-
-
     private void displayArtifacts(List<Artifact> artifacts) {
         artifactTableView.getItems().setAll(artifacts);
     }
 
     @FXML
     public void exportToJson(ActionEvent event) {
-        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Export Artifacts to JSON");
         fileChooser.getExtensionFilters().add(
-                new javafx.stage.FileChooser.ExtensionFilter("JSON Files", "*.json")
+                new FileChooser.ExtensionFilter("JSON Files", "*.json")
         );
 
-        // Set default directory to Desktop
         String userDesktop = System.getProperty("user.home") + "/Desktop";
         fileChooser.setInitialDirectory(new File(userDesktop));
 
-        // Show save dialog
         File file = fileChooser.showSaveDialog(null);
 
         if (file != null) {
             try (Writer writer = new FileWriter(file)) {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 gson.toJson(allArtifacts, writer);
-                System.out.println("Artifacts exported successfully to: " + file.getAbsolutePath());
+                LOGGER.info("Artifacts exported successfully to: " + file.getAbsolutePath());
+                showAlert(Alert.AlertType.INFORMATION, "Export Successful", 
+                        "Artifacts exported successfully to: " + file.getAbsolutePath());
             } catch (IOException e) {
-                e.printStackTrace();
-                showAlert("Error exporting artifacts to JSON.");
+                LOGGER.log(Level.SEVERE, "Error exporting artifacts", e);
+                showAlert(Alert.AlertType.ERROR, "Export Error", "Error exporting artifacts to JSON.");
             }
-        } else {
-            System.out.println("Export canceled by user.");
         }
     }
+
     @FXML
     public void handleImportJson(ActionEvent event) {
-        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Import Artifact JSON");
         fileChooser.getExtensionFilters().add(
-                new javafx.stage.FileChooser.ExtensionFilter("JSON Files", "*.json")
+                new FileChooser.ExtensionFilter("JSON Files", "*.json")
         );
 
         File selectedFile = fileChooser.showOpenDialog(null);
 
         if (selectedFile != null) {
-            System.out.println("Seçilen dosya: " + selectedFile.getAbsolutePath());
-            ArtifactRepository.getInstance().importFromJson(selectedFile.getAbsolutePath());
-            allArtifacts.clear();
-            allArtifacts.addAll(ArtifactRepository.getInstance().getArtifacts());
-            displayArtifacts(allArtifacts);
-            refreshTags();
-        } else {
-            System.out.println("Dosya seçimi iptal edildi.");
+            LOGGER.info("Selected file: " + selectedFile.getAbsolutePath());
+            boolean success = artifactService.importFromJson(selectedFile.getAbsolutePath());
+            
+            if (success) {
+                showAlert(Alert.AlertType.INFORMATION, "Import Successful", 
+                        "Artifacts imported successfully.");
+                allArtifacts.clear();
+                allArtifacts.addAll(artifactService.getAllArtifacts());
+                displayArtifacts(allArtifacts);
+                refreshTags();
+            } else {
+                showAlert(Alert.AlertType.WARNING, "Import Warning", 
+                        "No new artifacts were imported or the file was invalid.");
+            }
         }
     }
-
 
     private VBox createArtifactCard(Artifact artifact) {
         VBox box = new VBox();
@@ -277,77 +280,33 @@ public class MainScreenController implements Initializable {
 
         box.getChildren().addAll(imageView, nameLabel);
 
-        // 🆕 Sağ tıklama için ContextMenu oluşturuyoruz
         ContextMenu contextMenu = new ContextMenu();
         MenuItem editItem = new MenuItem("Edit");
         MenuItem deleteItem = new MenuItem("Delete");
         contextMenu.getItems().addAll(editItem, deleteItem);
 
-        // Edit seçilince edit ekranı açılıyor
-        editItem.setOnAction(e -> {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
-                Parent root = loader.load();
+        editItem.setOnAction(e -> openEditScreen(artifact));
 
-                EditScreenController controller = loader.getController();
-                controller.setEditMode(true, artifact);
-                controller.setOnArtifactSaved(() -> {
-                    artifactRepository.reloadArtifactsFromFile();
-                    allArtifacts = artifactRepository.getArtifacts();
-                    displayArtifacts(allArtifacts);
-                    refreshTags();
-                });
-
-                Stage stage = new Stage();
-                stage.setTitle("Edit Artifact");
-                stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/Museum.png")));
-                stage.setScene(new Scene(root));
-                stage.show();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
-
-        // Delete seçilince artifact siliniyor
         deleteItem.setOnAction(e -> {
-            artifactRepository.deleteArtifact(artifact.getArtifactID());
-            artifactRepository.reloadArtifactsFromFile();
-            allArtifacts = artifactRepository.getArtifacts();
-            displayArtifacts(allArtifacts);
-            refreshTags();
-            System.out.println("Artifact deleted via right-click menu: " + artifact.getArtifactID());
+            if (confirmDeletion(artifact)) {
+                artifactService.deleteArtifact(artifact.getArtifactID());
+                loadArtifacts();
+                displayArtifacts(allArtifacts);
+                refreshTags();
+                LOGGER.info("Artifact deleted via context menu: " + artifact.getArtifactID());
+            }
         });
 
         box.setOnMouseClicked(event -> {
             selectedArtifact = artifact;
             highlightSelectedCard(box);
 
-            if (event.getButton() == MouseButton.SECONDARY) { // SAĞ TIK mı diye bakıyoruz
+            if (event.getButton() == MouseButton.SECONDARY) {
                 contextMenu.show(box, event.getScreenX(), event.getScreenY());
-            } else if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY) { // SOL ÇİFT TIK
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
-                    Parent root = loader.load();
-
-                    EditScreenController controller = loader.getController();
-                    controller.setEditMode(true, artifact);
-                    controller.setOnArtifactSaved(() -> {
-                        artifactRepository.reloadArtifactsFromFile();
-                        allArtifacts = artifactRepository.getArtifacts();
-                        displayArtifacts(allArtifacts);
-                        refreshTags();
-                    });
-
-                    Stage stage = new Stage();
-                    stage.setTitle("Edit Artifact");
-                    stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/Museum.png")));
-                    stage.setScene(new Scene(root));
-                    stage.show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            } else if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY) {
+                openEditScreen(artifact);
             } else {
-                contextMenu.hide(); // Sol tıkta menüyü kapat
+                contextMenu.hide();
             }
         });
 
@@ -355,115 +314,88 @@ public class MainScreenController implements Initializable {
     }
 
     @FXML
-    private void onAddButtonClick(ActionEvent event) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
-        Parent root = fxmlLoader.load();
-
-        EditScreenController controller = fxmlLoader.getController();
-        controller.setEditMode(false, null); // Add mode
-
-        Stage stage = new Stage();
-        stage.setTitle("Add New Artifact");
-        stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/Museum.png")));
-
-        stage.setScene(new Scene(root));
-        stage.show();
-    }
-
-    @FXML
     private void handleEditMenu(ActionEvent event) {
         if (selectedArtifact == null) {
-            System.out.println("No artifact selected.");
+            showAlert(Alert.AlertType.WARNING, "No Selection", "No artifact selected for editing.");
             return;
         }
 
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
-            Parent root = loader.load();
-
-            EditScreenController controller = loader.getController();
-            controller.setEditMode(true, selectedArtifact);
-            controller.setOnArtifactSaved(() -> {
-                artifactRepository.reloadArtifactsFromFile();  // JSON'dan güncel listeyi yükle
-                allArtifacts = artifactRepository.getArtifacts();
-                displayArtifacts(allArtifacts);
-                refreshTags();
-            });
-
-
-            Stage stage = new Stage();
-            stage.setTitle("Edit Artifact");
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/Museum.png")));
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        openEditScreen(selectedArtifact);
     }
+
     @FXML
     private void handleAddMenu(ActionEvent event) {
-
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
             Parent root = loader.load();
 
             EditScreenController controller = loader.getController();
-            controller.setEditMode(false, null); // Yeni artifact ekleme modu
-            controller.setOnArtifactSaved(() -> {
-                artifactRepository.reloadArtifactsFromFile();  // JSON'dan güncel listeyi yükle
-                allArtifacts = artifactRepository.getArtifacts();
-                displayArtifacts(allArtifacts);
-                refreshTags();
-            });
+            controller.initializeNewArtifact();
 
             Stage stage = new Stage();
             stage.setTitle("Add New Artifact");
             stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/Museum.png")));
             stage.setScene(new Scene(root));
-            stage.show();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+            
+            // Refresh artifacts after dialog closes
+            loadArtifacts();
+            displayArtifacts(allArtifacts);
+            refreshTags();
+            
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error opening add dialog", e);
+            showAlert(Alert.AlertType.ERROR, "Error", "Error opening add dialog: " + e.getMessage());
         }
     }
-
 
     @FXML
     private void deleteArtifact() {
         if (selectedArtifact == null) {
-            showAlert("No artifact selected for deletion.");
+            showAlert(Alert.AlertType.WARNING, "No Selection", "No artifact selected for deletion.");
             return;
         }
 
-        // 🔥 Onay kutusu göster
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Delete Confirmation");
-        confirmation.setHeaderText(null);
-        confirmation.setContentText("Are you sure you want to delete the selected artifact?");
-
-        confirmation.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                artifactRepository.deleteArtifact(selectedArtifact.getArtifactID());
-                artifactRepository.reloadArtifactsFromFile();
-                allArtifacts = artifactRepository.getArtifacts();
+        if (confirmDeletion(selectedArtifact)) {
+            boolean success = artifactService.deleteArtifact(selectedArtifact.getArtifactID());
+            
+            if (success) {
+                LOGGER.info("Artifact deleted: " + selectedArtifact.getArtifactID());
+                loadArtifacts();
                 displayArtifacts(allArtifacts);
                 refreshTags();
                 selectedArtifact = null;
-                System.out.println("Artifact deleted successfully.");
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Delete Error", "Failed to delete the artifact.");
             }
-        });
+        }
+    }
+    
+    /**
+     * Show a confirmation dialog for artifact deletion
+     */
+    private boolean confirmDeletion(Artifact artifact) {
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Delete Confirmation");
+        confirmation.setHeaderText("Are you sure you want to delete this artifact?");
+        confirmation.setContentText("Name: " + artifact.getArtifactName() + "\nID: " + artifact.getArtifactID());
+
+        Optional<ButtonType> result = confirmation.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
     }
 
-
-
-
-
-    private void showAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Hata");
+    /**
+     * Show an alert dialog
+     */
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
     }
+
     private void highlightSelectedCard(VBox selectedCard) {
         for (javafx.scene.Node node : artifactGrid.getChildren()) {
             if (node instanceof VBox) {
@@ -472,23 +404,12 @@ public class MainScreenController implements Initializable {
         }
         selectedCard.setStyle("-fx-border-color: blue; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-color: #e0f0ff;");
     }
+
     public void refreshTags() {
-        this.allArtifacts = artifactRepository.getArtifacts();
-
-        List<String> allTags = new ArrayList<>();
-        for (Artifact artifact : allArtifacts) {
-            if (artifact.getTags() != null) {
-                for (String tag : artifact.getTags()) {
-                    tag = tag.trim();
-                    if (!tag.isEmpty() && !allTags.contains(tag)) {
-                        allTags.add(tag);
-                    }
-                }
-            }
-        }
-
+        List<String> allTags = artifactService.getAllTags();
         tagListView.setItems(FXCollections.observableArrayList(allTags));
     }
+
     @FXML
     private void handleAboutMenu() {
         try {
@@ -497,118 +418,96 @@ public class MainScreenController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle("User Manual");
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/HelpLogo.png"))); // 🔥 İKON EKLENDİ
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/HelpLogo.png")));
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error opening user manual", e);
+            showAlert(Alert.AlertType.ERROR, "Error", "Error opening user manual: " + e.getMessage());
         }
     }
+
     private void filterArtifactsByDate() {
         if (startDatePicker.getValue() != null && endDatePicker.getValue() != null) {
-            int startYear = startDatePicker.getValue().getYear();
-            int endYear = endDatePicker.getValue().getYear();
-
-            List<Artifact> filtered = allArtifacts.stream()
-                    .filter(a -> {
-                        try {
-                            String discoveryDate = a.getDiscoveryDate();
-                            if (discoveryDate != null && discoveryDate.matches("\\d{2}-\\d{2}-\\d{4}")) {
-                                String[] parts = discoveryDate.split("-");
-                                int year = Integer.parseInt(parts[2]); // yıl kısmını alıyoruz
-                                return year >= startYear && year <= endYear;
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        return false;
-                    })
-                    .toList();
-
+            String startDate = startDatePicker.getValue().toString();
+            String endDate = endDatePicker.getValue().toString();
+            
+            List<Artifact> filtered = artifactService.filterByDateRange(startDate, endDate);
             displayArtifacts(filtered);
         } else {
-            showAlert("Please select both start and end dates for filtering.");
+            showAlert(Alert.AlertType.WARNING, "Incomplete Selection", 
+                    "Please select both start and end dates for filtering.");
         }
     }
+
     private void clearFilters() {
-        // DatePicker alanlarını temizle
         startDatePicker.setValue(null);
         endDatePicker.setValue(null);
-
-        // Tags seçimlerini temizle
         tagListView.getSelectionModel().clearSelection();
-
-        // Artifact listesini yeniden yükle
+        selectedTags.clear();
+        loadArtifacts();
         displayArtifacts(allArtifacts);
     }
-    private void filterArtifactsByTag(String selectedTag) {
-        List<Artifact> filtered = allArtifacts.stream()
-                .filter(a -> a.getTags() != null && a.getTags().contains(selectedTag))
-                .toList();
 
+    /**
+     * Apply filters based on all selected tags
+     */
+    private void applyTagFilters() {
+        if (selectedTags.isEmpty()) {
+            // If no tags selected, show all artifacts
+            displayArtifacts(allArtifacts);
+            return;
+        }
+        
+        // Filter artifacts that have all the selected tags
+        List<Artifact> filtered = artifactService.filterByAllTags(selectedTags);
+        
+        // Display the filtered artifacts
         displayArtifacts(filtered);
+        
+        // Log the applied filter
+        LOGGER.info("Applied tag filter with tags: " + String.join(", ", selectedTags));
     }
+
     private void openEditScreen(Artifact artifact) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
             Parent root = loader.load();
 
             EditScreenController controller = loader.getController();
-            controller.setEditMode(true, artifact);
-            controller.setOnArtifactSaved(() -> {
-                artifactRepository.reloadArtifactsFromFile();
-                allArtifacts = artifactRepository.getArtifacts();
-                displayArtifacts(allArtifacts);
-                refreshTags();
-            });
+            controller.setArtifact(artifact);
 
             Stage stage = new Stage();
             stage.setTitle("Edit Artifact");
             stage.getIcons().add(new Image(getClass().getResourceAsStream("/artifactImages/Museum.png")));
             stage.setScene(new Scene(root));
-            stage.show();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+            
+            // Refresh artifacts after dialog closes
+            loadArtifacts();
+            displayArtifacts(allArtifacts);
+            refreshTags();
+            
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error opening edit dialog", e);
+            showAlert(Alert.AlertType.ERROR, "Error", "Error opening edit dialog: " + e.getMessage());
         }
     }
+
     private void performSearch() {
-        String input = searchField.getText().toLowerCase().trim();
+        String input = searchField.getText().trim();
 
         if (input.isEmpty()) {
             displayArtifacts(allArtifacts);
             return;
         }
 
-        String[] keywords = input.split(",");
+        List<Artifact> searchResults = artifactService.searchArtifacts(input);
+        displayArtifacts(searchResults);
+    }
 
-        List<Artifact> filtered = allArtifacts.stream()
-                .filter(a -> {
-                    for (String keyword : keywords) {
-                        String k = keyword.trim();
-                        if (k.isEmpty()) continue;
-
-                        boolean matches = false;
-
-                        if ((a.getArtifactName() != null && a.getArtifactName().toLowerCase().contains(k)) ||
-                                (a.getCategory() != null && a.getCategory().toLowerCase().contains(k)) ||
-                                (a.getCivilization() != null && a.getCivilization().toLowerCase().contains(k)) ||
-                                (a.getDiscoveryLocation() != null && a.getDiscoveryLocation().toLowerCase().contains(k)) ||
-                                (a.getComposition() != null && a.getComposition().toLowerCase().contains(k)) ||
-                                (a.getDiscoveryDate() != null && a.getDiscoveryDate().toLowerCase().contains(k)) ||
-                                (a.getCurrentPlace() != null && a.getCurrentPlace().toLowerCase().contains(k)) ||
-                                (a.getTags() != null && a.getTags().stream().anyMatch(tag -> tag.toLowerCase().contains(k)))) {
-                            matches = true;
-                        }
-
-                        if (!matches) return false; // AND mantığı: biri bile eşleşmezse elenir
-                    }
-                    return true; // tüm anahtar kelimeler eşleştiyse kalır
-                })
-                .toList();
-
-        displayArtifacts(filtered);
-}
     private void setupTableViewContextMenu() {
         artifactTableView.setRowFactory(tv -> {
             TableRow<Artifact> row = new TableRow<>();
@@ -618,7 +517,6 @@ public class MainScreenController implements Initializable {
             MenuItem deleteItem = new MenuItem("Delete");
             contextMenu.getItems().addAll(editItem, deleteItem);
 
-            // Edit seçilirse
             editItem.setOnAction(event -> {
                 Artifact selectedArtifact = row.getItem();
                 if (selectedArtifact != null) {
@@ -626,30 +524,16 @@ public class MainScreenController implements Initializable {
                 }
             });
 
-            // Delete seçilirse
             deleteItem.setOnAction(event -> {
                 Artifact selectedArtifact = row.getItem();
-                if (selectedArtifact != null) {
-                    // 🔥 Önce onay kutusu göster
-                    Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-                    confirmation.setTitle("Delete Confirmation");
-                    confirmation.setHeaderText(null);
-                    confirmation.setContentText("Are you sure you want to delete this artifact?");
-
-                    confirmation.showAndWait().ifPresent(response -> {
-                        if (response == ButtonType.OK) {
-                            artifactRepository.deleteArtifact(selectedArtifact.getArtifactID());
-                            artifactRepository.reloadArtifactsFromFile();
-                            allArtifacts = artifactRepository.getArtifacts();
-                            displayArtifacts(allArtifacts);
-                            refreshTags();
-                        }
-                    });
+                if (selectedArtifact != null && confirmDeletion(selectedArtifact)) {
+                    artifactService.deleteArtifact(selectedArtifact.getArtifactID());
+                    loadArtifacts();
+                    displayArtifacts(allArtifacts);
+                    refreshTags();
                 }
             });
 
-
-            // Sadece dolu satırlara menü ekle
             row.contextMenuProperty().bind(
                     javafx.beans.binding.Bindings.when(row.emptyProperty())
                             .then((ContextMenu) null)
@@ -660,15 +544,22 @@ public class MainScreenController implements Initializable {
         });
     }
 
-
-
-
-
-
-
-
-
-
-
-
+    /**
+     * Set up the tag list view to allow multiple selection and handle selections
+     */
+    private void setupTagListView() {
+        // Set the selection mode to MULTIPLE
+        tagListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        
+        // Add listener for tag selection changes
+        tagListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            // Get all selected tags
+            selectedTags = new ArrayList<>(tagListView.getSelectionModel().getSelectedItems());
+            
+            // Auto-apply tag filter if a tag was selected or deselected
+            if (oldVal != null || newVal != null) {
+                applyTagFilters();
+            }
+        });
+    }
 }

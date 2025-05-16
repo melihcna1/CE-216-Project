@@ -1,7 +1,8 @@
 package com.example.artifactcataloggg.controller;
 
-import com.example.artifactcataloggg.Artifact;
-import com.example.artifactcataloggg.ArtifactRepository;
+import com.example.artifactcataloggg.model.Artifact;
+import com.example.artifactcataloggg.repository.JsonArtifactRepository;
+import com.example.artifactcataloggg.service.ArtifactService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -21,9 +22,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class UIController {
+    private static final Logger LOGGER = Logger.getLogger(UIController.class.getName());
 
     @FXML private TextField artifactIdField;
     @FXML private TextField tagsField;
@@ -44,7 +48,7 @@ public class UIController {
     @FXML private ImageView artifactImageView;
 
     private String selectedImagePath = null;
-    private ArtifactRepository artifactRepository = new ArtifactRepository();
+    private final ArtifactService artifactService = ArtifactService.getInstance();
     private Stage editStage;
     private Artifact selectedArtifact;
 
@@ -63,22 +67,22 @@ public class UIController {
             String discoveryDate = discoveryDateField.getText().trim();
             String currentPlace = currentPlaceField.getText().trim();
 
-            // Boş alan kontrolü
+            // Validate required fields
             if (artifactID.isEmpty() || name.isEmpty() || category.isEmpty() || widthField.getText().isEmpty()) {
-                showAlert("Lütfen gerekli alanları doldurunuz.");
+                showAlert("Please fill in all required fields.");
                 return;
             }
 
-            // Aynı ID ile daha önce artifact eklenmiş mi?
-            if (artifactRepository.existsById(artifactID)) {
-                showAlert("Bu ID'ye sahip bir artifact zaten mevcut.");
+            // Check if artifact with same ID already exists
+            if (artifactService.artifactExists(artifactID)) {
+                showAlert("An artifact with this ID already exists.");
                 return;
             }
 
-            double width = tryParseDouble(widthField.getText(), "Genişlik");
-            double length = tryParseDouble(lengthField.getText(), "Uzunluk");
-            double height = tryParseDouble(heightField.getText(), "Yükseklik");
-            double weight = tryParseDouble(weightField.getText(), "Ağırlık");
+            double width = tryParseDouble(widthField.getText(), "Width");
+            double length = tryParseDouble(lengthField.getText(), "Length");
+            double height = tryParseDouble(heightField.getText(), "Height");
+            double weight = tryParseDouble(weightField.getText(), "Weight");
 
             List<String> tags = Arrays.stream(tagsField.getText().split(","))
                     .map(String::trim)
@@ -89,15 +93,16 @@ public class UIController {
                     discoveryLocation, composition, discoveryDate,
                     currentPlace, width, length, height, weight, tags, selectedImagePath);
 
-            artifactRepository.addArtifact(newArtifact);
+            artifactService.addArtifact(newArtifact);
             artifactData.add(newArtifact);
             artifactListView.setItems(artifactData);
 
-            System.out.println("Artifact başarıyla eklendi: " + artifactID);
+            LOGGER.info("Artifact added successfully: " + artifactID);
             clearFields();
 
         } catch (NumberFormatException e) {
-            showAlert("Sayısal alanlarda geçersiz giriş: " + e.getMessage());
+            showAlert("Invalid numeric input: " + e.getMessage());
+            LOGGER.log(Level.WARNING, "Invalid numeric input", e);
         }
     }
 
@@ -105,13 +110,13 @@ public class UIController {
         try {
             return Double.parseDouble(text);
         } catch (NumberFormatException e) {
-            throw new NumberFormatException(fieldName + " değeri geçersiz: " + text);
+            throw new NumberFormatException(fieldName + " value is invalid: " + text);
         }
     }
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Hata");
+        alert.setTitle("Error");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
@@ -124,9 +129,14 @@ public class UIController {
         File selectedFile = fileChooser.showOpenDialog(selectImageButton.getScene().getWindow());
 
         if (selectedFile != null) {
-            selectedImagePath = selectedFile.toURI().toString();
-            artifactImageView.setImage(new Image(selectedImagePath));
-            System.out.println("Seçilen resim: " + selectedImagePath);
+            selectedImagePath = selectedFile.getAbsolutePath();
+            try {
+                artifactImageView.setImage(new Image(selectedFile.toURI().toString()));
+                LOGGER.info("Selected image: " + selectedImagePath);
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to load image", e);
+                showAlert("Failed to load image: " + e.getMessage());
+            }
         }
     }
 
@@ -154,16 +164,16 @@ public class UIController {
         selectedArtifact = artifactListView.getSelectionModel().getSelectedItem();
 
         if (selectedArtifact == null) {
-            showAlert("Düzenlenecek artifact seçilmedi!");
+            showAlert("No artifact selected for editing!");
             return;
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/view/EditScreen.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/artifactcataloggg/EditScreen.fxml"));
             Parent root = loader.load();
 
-            UIController editController = loader.getController();
-            editController.setArtifactData(selectedArtifact);
+            EditScreenController editController = loader.getController();
+            editController.setArtifact(selectedArtifact);
 
             Stage stage = new Stage();
             stage.setTitle("Edit Artifact");
@@ -171,12 +181,28 @@ public class UIController {
             this.editStage = stage;
 
             editStage.showAndWait();
+            
+            // Refresh the list after editing
+            refreshArtifactList();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error opening edit dialog", e);
+            showAlert("Error opening edit dialog: " + e.getMessage());
         }
     }
+    
+    /**
+     * Refresh the artifact list with current data
+     */
+    private void refreshArtifactList() {
+        artifactData.clear();
+        artifactData.addAll(artifactService.getAllArtifacts());
+        artifactListView.refresh();
+    }
 
+    /**
+     * Set the data for the selected artifact during editing
+     */
     public void setArtifactData(Artifact artifact) {
         this.selectedArtifact = artifact;
 
@@ -194,43 +220,74 @@ public class UIController {
         weightField.setText(String.valueOf(artifact.getWeight()));
         tagsField.setText(String.join(",", artifact.getTags()));
 
-        if (artifact.getImagePath() != null) {
-            artifactImageView.setImage(new Image(artifact.getImagePath()));
-            selectedImagePath = artifact.getImagePath(); // edit sırasında null olmasın
+        if (artifact.getImagePath() != null && !artifact.getImagePath().isEmpty()) {
+            loadImage(artifact.getImagePath());
+            selectedImagePath = artifact.getImagePath();
+        }
+    }
+    
+    /**
+     * Load an image from the provided path
+     */
+    private void loadImage(String imagePath) {
+        try {
+            File imageFile = new File(imagePath);
+            if (imageFile.exists()) {
+                artifactImageView.setImage(new Image(imageFile.toURI().toString()));
+            } else {
+                // Try to load from resources if not found as a file
+                String resourcePath = imagePath.startsWith("/") ? imagePath : "/" + imagePath;
+                Image image = new Image(getClass().getResourceAsStream(resourcePath));
+                artifactImageView.setImage(image);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to load image: " + imagePath, e);
+            artifactImageView.setImage(null);
         }
     }
 
     @FXML
     private void handleEditSave() {
         if (selectedArtifact != null) {
-            selectedArtifact.setArtifactID(artifactIdField.getText());
-            selectedArtifact.setArtifactName(artifactNameField.getText());
-            selectedArtifact.setCategory(categoryField.getText());
-            selectedArtifact.setCivilization(civilizationField.getText());
-            selectedArtifact.setDiscoveryLocation(discoveryLocationField.getText());
-            selectedArtifact.setComposition(compositionField.getText());
-            selectedArtifact.setDiscoveryDate(discoveryDateField.getText());
-            selectedArtifact.setCurrentPlace(currentPlaceField.getText());
-            selectedArtifact.setWidth(tryParseDouble(widthField.getText(), "Genişlik"));
-            selectedArtifact.setLength(tryParseDouble(lengthField.getText(), "Uzunluk"));
-            selectedArtifact.setHeight(tryParseDouble(heightField.getText(), "Yükseklik"));
-            selectedArtifact.setWeight(tryParseDouble(weightField.getText(), "Ağırlık"));
+            try {
+                selectedArtifact.setArtifactID(artifactIdField.getText());
+                selectedArtifact.setArtifactName(artifactNameField.getText());
+                selectedArtifact.setCategory(categoryField.getText());
+                selectedArtifact.setCivilization(civilizationField.getText());
+                selectedArtifact.setDiscoveryLocation(discoveryLocationField.getText());
+                selectedArtifact.setComposition(compositionField.getText());
+                selectedArtifact.setDiscoveryDate(discoveryDateField.getText());
+                selectedArtifact.setCurrentPlace(currentPlaceField.getText());
+                selectedArtifact.setWidth(tryParseDouble(widthField.getText(), "Width"));
+                selectedArtifact.setLength(tryParseDouble(lengthField.getText(), "Length"));
+                selectedArtifact.setHeight(tryParseDouble(heightField.getText(), "Height"));
+                selectedArtifact.setWeight(tryParseDouble(weightField.getText(), "Weight"));
 
-            List<String> tags = Arrays.stream(tagsField.getText().split(","))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .collect(Collectors.toList());
-            selectedArtifact.setTags(tags);
+                List<String> tags = Arrays.stream(tagsField.getText().split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .collect(Collectors.toList());
+                selectedArtifact.setTags(tags);
 
-            // Eğer yeni resim seçildiyse güncelle
-            if (selectedImagePath != null) {
-                selectedArtifact.setImagePath(selectedImagePath);
-            }
+                // Update image path if a new image was selected
+                if (selectedImagePath != null) {
+                    selectedArtifact.setImagePath(selectedImagePath);
+                }
 
-            artifactListView.refresh(); // UI'da değişikliği göster
-            if (editStage != null) {
-                editStage.close();
+                // Save changes
+                artifactService.updateArtifact(selectedArtifact);
+                
+                LOGGER.info("Artifact updated successfully: " + selectedArtifact.getArtifactID());
+                
+                artifactListView.refresh(); // Refresh UI
+                if (editStage != null) {
+                    editStage.close();
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error saving artifact", e);
+                showAlert("Error saving artifact: " + e.getMessage());
             }
         }
     }
 }
+

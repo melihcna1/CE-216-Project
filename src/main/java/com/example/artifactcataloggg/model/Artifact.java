@@ -1,9 +1,11 @@
-package com.example.artifactcataloggg;
+package com.example.artifactcataloggg.model;
 
 import java.util.ArrayList;
 import java.util.List;
 
-// Data model representing an artifact entity
+/**
+ * Model class representing an artifact entity in the catalog
+ */
 public class Artifact {
     private String artifactID;
     private String artifactName;
@@ -18,14 +20,18 @@ public class Artifact {
     private List<String> tags;
     private String imagePath;
 
-
-    // Constructors
+    /**
+     * Default constructor
+     */
     public Artifact() {}
 
+    /**
+     * Complete constructor with all fields
+     */
     public Artifact(String artifactID, String artifactName, String category, String civilization,
-                    String discoveryLocation, String composition, String discoveryDate,
-                    String currentPlace, double width, double length, double height, double weight,
-                    List<String> tags, String imagePath) {
+                String discoveryLocation, String composition, String discoveryDate,
+                String currentPlace, double width, double length, double height, double weight,
+                List<String> tags, String imagePath) {
         this.artifactID = artifactID;
         this.artifactName = artifactName;
         this.category = category;
@@ -41,8 +47,12 @@ public class Artifact {
         this.tags = tags;
         this.imagePath = imagePath;
     }
-    public Artifact(String artifactName, String imagePath) {
-        this.artifactID = "Unknown";
+    
+    /**
+     * Simple constructor with minimal fields, uses default values for others
+     */
+    public Artifact(String artifactID, String artifactName, String imagePath) {
+        this.artifactID = artifactID;
         this.artifactName = artifactName;
         this.category = "Unknown";
         this.civilization = "Unknown";
@@ -57,8 +67,6 @@ public class Artifact {
         this.tags = new ArrayList<>();
         this.imagePath = imagePath;
     }
-
-
 
     // Getters and setters
     public String getArtifactID() { return artifactID; }
@@ -106,8 +114,9 @@ public class Artifact {
     public String getImagePath() { return imagePath; }
     public void setImagePath(String imagePath) { this.imagePath = imagePath; }
 
-
-
+    /**
+     * Add a new tag, ensuring it's lowercase and unique
+     */
     public void addTag(String tag) {
         if (tags == null) tags = new ArrayList<>();
         if (!tags.contains(tag.toLowerCase())) {
@@ -115,6 +124,9 @@ public class Artifact {
         }
     }
 
+    /**
+     * Remove a tag
+     */
     public void removeTag(String tag) {
         if (tags != null) {
             tags.remove(tag.toLowerCase());
@@ -132,11 +144,9 @@ public class Artifact {
                 ", composition='" + composition + '\'' +
                 ", discoveryDate='" + discoveryDate + '\'' +
                 ", currentPlace='" + currentPlace + '\'' +
-                ", width=" + width +
-                ", length=" + length +
-                ", height=" + height +
+                ", dimensions=" + width + "x" + length + "x" + height +
                 ", weight=" + weight +
                 ", tags=" + tags +
                 '}';
     }
-}
+} 
