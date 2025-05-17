@@ -257,28 +257,35 @@ public class EditScreenController {
         artifact.setComposition(compositionField.getText().trim());
         artifact.setDiscoveryDate(discoveryDateField.getText().trim());
         artifact.setCurrentPlace(currentPlaceField.getText().trim());
-        
+
         // Parse numeric fields with defaults if empty
-        artifact.setWidth(widthField.getText().trim().isEmpty() ? 0 : 
+        artifact.setWidth(widthField.getText().trim().isEmpty() ? 0 :
                 Double.parseDouble(widthField.getText().trim()));
-        artifact.setLength(lengthField.getText().trim().isEmpty() ? 0 : 
+        artifact.setLength(lengthField.getText().trim().isEmpty() ? 0 :
                 Double.parseDouble(lengthField.getText().trim()));
-        artifact.setHeight(heightField.getText().trim().isEmpty() ? 0 : 
+        artifact.setHeight(heightField.getText().trim().isEmpty() ? 0 :
                 Double.parseDouble(heightField.getText().trim()));
-        artifact.setWeight(weightField.getText().trim().isEmpty() ? 0 : 
+        artifact.setWeight(weightField.getText().trim().isEmpty() ? 0 :
                 Double.parseDouble(weightField.getText().trim()));
-        
-        // Process tags (split by comma, trim, and filter empty)
-        List<String> tags = Arrays.stream(tagsArea.getText().split(","))
+
+        // Tags işlemi — tüm boşlukları ve boş elemanları temizler
+        String rawTags = tagsArea.getText().trim()
+                .replaceAll("\\s*,\\s*", ",") // boşluklu virgülleri sadeleştir
+                .replaceAll(",{2,}", ",")     // ardışık virgülleri teke indir
+                .replaceAll("^,|,$", "");     // baştaki veya sondaki virgülü sil
+
+        List<String> tags = Arrays.stream(rawTags.split(","))
                 .map(String::trim)
                 .filter(tag -> !tag.isEmpty())
                 .collect(Collectors.toList());
         artifact.setTags(tags);
-        
+
         // Update image path
         artifact.setImagePath(imagePath);
     }
-    
+
+
+
     /**
      * Close the window
      */

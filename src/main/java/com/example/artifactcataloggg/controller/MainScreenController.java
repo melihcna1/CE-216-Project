@@ -2,6 +2,7 @@ package com.example.artifactcataloggg.controller;
 
 import com.example.artifactcataloggg.model.Artifact;
 import com.example.artifactcataloggg.service.ArtifactService;
+import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -25,6 +26,7 @@ import javafx.geometry.Insets;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.io.*;
 import java.net.URL;
@@ -188,24 +190,64 @@ public class MainScreenController implements Initializable {
                 new FileChooser.ExtensionFilter("JSON Files", "*.json")
         );
 
-        String userDesktop = System.getProperty("user.home") + "/Desktop";
-        fileChooser.setInitialDirectory(new File(userDesktop));
+        File initialDir = getInitialDirectory();
+        if (initialDir != null && initialDir.exists() && initialDir.isDirectory()) {
+            fileChooser.setInitialDirectory(initialDir);
+        }
 
-        File file = fileChooser.showSaveDialog(null);
+        Window window = null;
+        Object source = event.getSource();
+
+        if (source instanceof Node) {
+            window = ((Node) source).getScene().getWindow();
+        } else if (source instanceof MenuItem) {
+            MenuItem menuItem = (MenuItem) source;
+            if (menuItem.getParentPopup() != null) {
+                window = menuItem.getParentPopup().getOwnerWindow();
+            }
+        }
+
+        File file;
+        if (window != null) {
+            file = fileChooser.showSaveDialog(window);
+        } else {
+            file = fileChooser.showSaveDialog(null);
+        }
 
         if (file != null) {
             try (Writer writer = new FileWriter(file)) {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 gson.toJson(allArtifacts, writer);
-                LOGGER.info("Artifacts exported successfully to: " + file.getAbsolutePath());
-                showAlert(Alert.AlertType.INFORMATION, "Export Successful", 
+                showAlert(Alert.AlertType.INFORMATION, "Export Successful",
                         "Artifacts exported successfully to: " + file.getAbsolutePath());
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Error exporting artifacts", e);
+                e.printStackTrace();
                 showAlert(Alert.AlertType.ERROR, "Export Error", "Error exporting artifacts to JSON.");
             }
         }
     }
+
+    private File getInitialDirectory() {
+        // Denenecek dizinleri sırayla dön
+        String userHome = System.getProperty("user.home");
+        String[] possiblePaths = {
+                userHome + File.separator + "Desktop",
+                userHome + File.separator + "Masaüstü", // Türkçe Windows için
+                userHome
+        };
+
+        for (String path : possiblePaths) {
+            File dir = new File(path);
+            if (dir.exists() && dir.isDirectory()) {
+                return dir;
+            }
+        }
+        return null; // Hiçbiri yoksa null döner
+    }
+
+
+
+
 
     @FXML
     public void handleImportJson(ActionEvent event) {
@@ -504,7 +546,7 @@ public class MainScreenController implements Initializable {
             return;
         }
 
-        List<Artifact> searchResults = artifactService.searchArtifacts(input);
+        List<Artifact> searchResults = artifactService.searchArtifacts(allArtifacts, input);
         displayArtifacts(searchResults);
     }
 

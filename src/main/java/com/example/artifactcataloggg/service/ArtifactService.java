@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Main service for artifact operations that coordinates between repositories and specialized services
@@ -104,11 +105,57 @@ public class ArtifactService {
     /**
      * Search for artifacts matching the query
      */
-    public List<Artifact> searchArtifacts(String query) {
-        List<Artifact> artifacts = repository.getAllArtifacts();
-        return searchService.searchArtifacts(artifacts, query);
+    public List<Artifact> searchArtifacts(List<Artifact> artifacts, String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return artifacts;
+        }
+
+        String[] terms = query.toLowerCase().split(",");
+
+        return artifacts.stream()
+                .filter(artifact -> {
+                    // Null kontrolü ve küçük harfe çevirme
+                    String name = artifact.getArtifactName() != null ? artifact.getArtifactName().toLowerCase() : "";
+                    String category = artifact.getCategory() != null ? artifact.getCategory().toLowerCase() : "";
+                    String civilization = artifact.getCivilization() != null ? artifact.getCivilization().toLowerCase() : "";
+                    String discoveryLocation = artifact.getDiscoveryLocation() != null ? artifact.getDiscoveryLocation().toLowerCase() : "";
+                    String composition = artifact.getComposition() != null ? artifact.getComposition().toLowerCase() : "";
+                    String discoveryDate = artifact.getDiscoveryDate() != null ? artifact.getDiscoveryDate().toLowerCase() : "";
+                    String currentPlace = artifact.getCurrentPlace() != null ? artifact.getCurrentPlace().toLowerCase() : "";
+                    // Tags listesi
+                    List<String> tags = artifact.getTags() != null ? artifact.getTags().stream()
+                            .map(String::toLowerCase)
+                            .collect(Collectors.toList()) : new ArrayList<>();
+
+                    for (String term : terms) {
+                        String trimmed = term.trim();
+                        if (trimmed.isEmpty()) continue;
+
+                        boolean foundInTags = tags.contains(trimmed);
+                        boolean foundInName = name.contains(trimmed);
+                        boolean foundInCategory = category.contains(trimmed);
+                        boolean foundInCivilization = civilization.contains(trimmed);
+                        boolean foundInDiscoveryLocation = discoveryLocation.contains(trimmed);
+                        boolean foundInComposition = composition.contains(trimmed);
+                        boolean foundInDiscoveryDate = discoveryDate.contains(trimmed);
+                        boolean foundInCurrentPlace = currentPlace.contains(trimmed);
+
+                        // AND koşulu: her terim en az bir yerde geçmeli
+                        if (!(foundInTags || foundInName || foundInCategory || foundInCivilization ||
+                                foundInDiscoveryLocation || foundInComposition || foundInDiscoveryDate || foundInCurrentPlace)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                })
+                .collect(Collectors.toList());
     }
-    
+
+
+
+
+
     /**
      * Filter artifacts by tags (AND logic)
      */
