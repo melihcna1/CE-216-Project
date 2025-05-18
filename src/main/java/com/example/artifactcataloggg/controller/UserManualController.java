@@ -51,6 +51,7 @@ public class UserManualController {
         
         manual.append("5. FILTERING\n");
         manual.append("   - Use the tag list on the right to filter artifacts by tags\n");
+        manual.append("   - Use ctrl+left click or shift+left click while selecting tags to select multiple tagsn");
         manual.append("   - Use the date pickers to filter by discovery date range\n");
         manual.append("   - Click 'Clear Filters' to reset all filters\n\n");
         
